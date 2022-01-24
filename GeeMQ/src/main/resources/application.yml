@@ -1,0 +1,5 @@
+server:
+  port: 1641
+spring:
+  application:
+    name: GeeMQ
