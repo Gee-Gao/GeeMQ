@@ -34,8 +34,14 @@ public class QueueConsumer implements MQConsumer {
             thread.setName(CONSUMER_QUEUE_PREFIX + queueName + ":" + UUID.fastUUID());
         }
 
-        thread.start();
-        log.info("消费者:{},已启动", thread.getName());
+        try {
+            thread.start();
+            log.debug("消费者:{},启动", thread.getName());
+            thread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("消费者:{},启动失败", thread.getName());
+        }
     }
 
     // 生成一个指定名字的消费者
@@ -50,10 +56,16 @@ public class QueueConsumer implements MQConsumer {
         if (StrUtil.isEmpty(queueName)) {
             throw new RuntimeException("队列名不能为空");
         }
+        try {
+            Thread thread = consumerGenerateWithConsumerName(consumerName, queueName, realTime);
+            log.debug("消费者:{},启动", consumerName);
+            thread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("消费者:{},启动失败", consumerName);
+        }
 
-        Thread thread = consumerGenerateWithConsumerName(consumerName, queueName, realTime);
-        thread.start();
-        log.info("消费者:{},已启动", thread.getName());
+
     }
 
     // 获取当前所有消费者线程名字
