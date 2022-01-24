@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -60,7 +59,7 @@ public class QueueConsumer implements MQConsumer {
     // 获取当前所有消费者线程名字
     @GetMapping("/getThreadName")
     public List<String> consumerThreadName() {
-        return consumerThreads(CONSUMER_QUEUE_PREFIX).stream().map(Thread::getName).collect(Collectors.toList());
+        return consumerNameByPrefix(CONSUMER_QUEUE_PREFIX);
     }
 
     // 停止消费者

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface MQConsumer {
     // 获取当前前缀所有消费者线程
@@ -25,7 +26,13 @@ public interface MQConsumer {
         return consumerList;
     }
 
-   default void stopConsumer(@PathVariable String consumerName,String prefix) {
+    // 获取指定前缀所有消费者名称
+    default List<String> consumerNameByPrefix(String prefix) {
+        return consumerThreads(prefix).stream().map(Thread::getName).collect(Collectors.toList());
+    }
+
+    // 停止指定前缀消费者
+    default void stopConsumer(@PathVariable String consumerName, String prefix) {
         String[] consumerNames = consumerName.split(",");
         List<Thread> allConsumer = consumerThreads(prefix);
         for (String waitStopConsumerName : consumerNames) {
