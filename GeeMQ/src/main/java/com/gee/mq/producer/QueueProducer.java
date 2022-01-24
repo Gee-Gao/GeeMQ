@@ -1,6 +1,6 @@
 package com.gee.mq.producer;
 
-import com.gee.mq.bean.MQ;
+import com.gee.mq.bean.QueueMQ;
 import com.gee.mq.manage.MQManage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,15 +19,14 @@ public class QueueProducer implements MQProducer {
     // 发送消息
     @GetMapping
     public void sendMsg(String queueName, String msg) {
-        ConcurrentHashMap<String, MQ> mqHashMap = mqManage.getMqHashMap();
-        MQ mq = mqHashMap.get(queueName);
-        if (mq == null) {
-            mq = new MQ();
-            mq.setQueueName(queueName);
-            mq.getQueue().add(msg);
-            mqHashMap.put(queueName, mq);
+        ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getMqHashMap();
+        QueueMQ queueMq = mqHashMap.get(queueName);
+        if (queueMq == null) {
+            queueMq = new QueueMQ();
+            queueMq.getQueue().add(msg);
+            mqHashMap.put(queueName, queueMq);
         } else {
-            mq.getQueue().add(msg);
+            queueMq.getQueue().add(msg);
         }
     }
 

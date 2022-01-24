@@ -2,14 +2,14 @@ package com.gee.mq.consumer;
 
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
-import com.gee.mq.bean.MQ;
+import com.gee.mq.bean.QueueMQ;
 import com.gee.mq.manage.MQManage;
-import com.sun.jmx.remote.internal.ArrayQueue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -84,14 +84,14 @@ public class QueueConsumer implements MQConsumer {
         Boolean finalIsRealTime = isRealTime;
 
         return new Thread(() -> {
-            ConcurrentHashMap<String, MQ> mqHashMap = mqManage.getMqHashMap();
+            ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getMqHashMap();
             while (!Thread.currentThread().isInterrupted()) {
-                MQ mq = mqHashMap.get(queueName);
-                if (mq != null) {
-                    ArrayQueue<String> queue = mq.getQueue();
+                QueueMQ queueMq = mqHashMap.get(queueName);
+                if (queueMq != null) {
+                    ArrayBlockingQueue<String> queue = queueMq.getQueue();
                     if (queue != null) {
                         if (!queue.isEmpty()) {
-                            Object remove = queue.remove(0);
+                            String remove = queue.poll();
                             System.out.println(Thread.currentThread().getName() + "消费消息" + remove);
                         }
                     }
