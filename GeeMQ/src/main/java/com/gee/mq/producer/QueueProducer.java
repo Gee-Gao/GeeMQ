@@ -1,5 +1,6 @@
 package com.gee.mq.producer;
 
+import cn.hutool.core.util.StrUtil;
 import com.gee.mq.bean.QueueMQ;
 import com.gee.mq.manage.MQManage;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,14 @@ public class QueueProducer implements MQProducer {
     // 发送消息
     @GetMapping
     public void sendMsg(String queueName, String msg) {
+        if(StrUtil.isEmpty(queueName)){
+            throw new RuntimeException("主题名不能为空");
+        }
+
+        if (StrUtil.isEmpty(msg)) {
+            throw new RuntimeException("消息不能为空");
+        }
+
         ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getQueueMqHashMap();
         QueueMQ queueMq = mqHashMap.get(queueName);
         if (queueMq == null) {
