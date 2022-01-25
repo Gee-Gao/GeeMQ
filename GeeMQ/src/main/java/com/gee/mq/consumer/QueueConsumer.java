@@ -69,7 +69,7 @@ public class QueueConsumer implements MQConsumer {
     }
 
     // 获取当前所有消费者线程名字
-    @GetMapping("/getThreadName")
+    @GetMapping("/getConsumerName")
     public List<String> consumerThreadName() {
         return consumerNameByPrefix(CONSUMER_QUEUE_PREFIX);
     }
