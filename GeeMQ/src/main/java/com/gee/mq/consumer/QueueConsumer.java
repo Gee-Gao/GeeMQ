@@ -37,7 +37,6 @@ public class QueueConsumer implements MQConsumer {
         try {
             thread.start();
             log.debug("消费者:{},启动", thread.getName());
-            thread.start();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("消费者:{},启动失败", thread.getName());
