@@ -19,7 +19,7 @@ public class QueueProducer implements MQProducer {
     // 发送消息
     @GetMapping
     public void sendMsg(String queueName, String msg) {
-        ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getMqHashMap();
+        ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getQueueMqHashMap();
         QueueMQ queueMq = mqHashMap.get(queueName);
         if (queueMq == null) {
             queueMq = new QueueMQ();

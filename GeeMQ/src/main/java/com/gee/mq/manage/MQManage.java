@@ -9,5 +9,5 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Data
 public class MQManage {
-    private volatile ConcurrentHashMap<String, QueueMQ> mqHashMap = new ConcurrentHashMap<>(1024);
+    private volatile ConcurrentHashMap<String, QueueMQ> queueMqHashMap = new ConcurrentHashMap<>(1024);
 }

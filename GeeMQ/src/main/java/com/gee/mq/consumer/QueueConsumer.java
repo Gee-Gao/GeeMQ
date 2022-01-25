@@ -96,7 +96,7 @@ public class QueueConsumer implements MQConsumer {
         Boolean finalIsRealTime = isRealTime;
 
         return new Thread(() -> {
-            ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getMqHashMap();
+            ConcurrentHashMap<String, QueueMQ> mqHashMap = mqManage.getQueueMqHashMap();
             while (!Thread.currentThread().isInterrupted()) {
                 QueueMQ queueMq = mqHashMap.get(queueName);
                 if (queueMq != null) {
