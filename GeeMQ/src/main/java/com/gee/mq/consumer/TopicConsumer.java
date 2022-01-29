@@ -66,6 +66,12 @@ public class TopicConsumer implements MQConsumer {
         return thread;
     }
 
+    // 停止消费者
+    @GetMapping("/stop/{consumerName}")
+    public void stopQueueConsumer(@PathVariable String consumerName) {
+        stopConsumer(consumerName, CONSUMER_TOPIC_PREFIX);
+    }
+
     // 获取当前所有消费者线程名字
     @GetMapping("/getConsumerName")
     public List<String> consumerThreadName() {
