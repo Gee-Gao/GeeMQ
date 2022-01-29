@@ -46,25 +46,20 @@ public class QueueConsumer implements MQConsumer {
     // 生成一个指定名字的消费者
     @GetMapping("/{consumerName}")
     public void receiveMsg(@PathVariable("consumerName") String consumerName, String queueName, @RequestParam(required = false) Boolean realTime) {
-        long count = consumerThreads(CONSUMER_QUEUE_PREFIX).stream().filter(item -> item.getName().equals(CONSUMER_QUEUE_PREFIX + consumerName)).count();
-
-        if (count > 0) {
-            throw new RuntimeException("消费者已存在");
-        }
+        consumerCountCheck(CONSUMER_QUEUE_PREFIX, consumerName);
 
         if (StrUtil.isEmpty(queueName)) {
             throw new RuntimeException("队列名不能为空");
         }
+
         try {
             Thread thread = consumerGenerateWithConsumerName(consumerName, queueName, realTime);
-            log.debug("消费者:{},启动", consumerName);
+            log.info("消费者:{},启动", consumerName);
             thread.start();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("消费者:{},启动失败", consumerName);
         }
-
-
     }
 
     // 获取当前所有消费者线程名字
@@ -82,7 +77,7 @@ public class QueueConsumer implements MQConsumer {
     // 生成指定名字消费者线程
     public Thread consumerGenerateWithConsumerName(String consumerName, String queueName, Boolean realTime) {
         Thread thread = consumerGenerate(queueName, realTime);
-        thread.setName(CONSUMER_QUEUE_PREFIX + consumerName);
+        thread.setName(CONSUMER_QUEUE_PREFIX + queueName + ":" + consumerName);
         return thread;
     }
 

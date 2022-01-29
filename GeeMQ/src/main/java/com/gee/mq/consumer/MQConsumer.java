@@ -44,4 +44,17 @@ public interface MQConsumer {
             }
         }
     }
+
+    // 计算指定前缀消费者数量
+    default long consumerCount(String prefix, String consumerName) {
+        return consumerThreads(prefix).stream().filter(item -> item.getName().equals(prefix + consumerName)).count();
+    }
+
+    // 消费者重复检查
+    default void consumerCountCheck(String prefix, String consumerName) {
+        long count = consumerCount(prefix, consumerName);
+        if (count > 0) {
+            throw new RuntimeException(prefix + "类型消费者已存在");
+        }
+    }
 }

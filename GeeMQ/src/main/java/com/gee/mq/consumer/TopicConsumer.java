@@ -6,10 +6,7 @@ import com.gee.mq.bean.TopicMQ;
 import com.gee.mq.manage.MQManage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -44,6 +41,31 @@ public class TopicConsumer implements MQConsumer {
         }
     }
 
+    // 生成一个指定名字的消费者
+    @GetMapping("/{consumerName}")
+    public void receiveMsg(@PathVariable("consumerName") String consumerName, String topicName, @RequestParam(required = false) Boolean realTime) {
+        consumerCountCheck(CONSUMER_TOPIC_PREFIX, consumerName);
+
+        if (StrUtil.isEmpty(topicName)) {
+            throw new RuntimeException("主题名不能为空");
+        }
+
+        try {
+            Thread thread = consumerGenerateWithConsumerName(consumerName, topicName, realTime);
+            log.info("消费者:{},启动", consumerName);
+            thread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("消费者:{},启动失败", consumerName);
+        }
+    }
+
+    private Thread consumerGenerateWithConsumerName(String consumerName, String topicName, Boolean isRealTime) {
+        Thread thread = consumerGenerate(topicName, isRealTime);
+        thread.setName(CONSUMER_TOPIC_PREFIX + topicName + ":" + consumerName);
+        return thread;
+    }
+
     // 获取当前所有消费者线程名字
     @GetMapping("/getConsumerName")
     public List<String> consumerThreadName() {
@@ -62,14 +84,14 @@ public class TopicConsumer implements MQConsumer {
 
             while (!Thread.currentThread().isInterrupted()) {
                 Set<TopicMQ> set = topicMqHashMap.get(topicName);
-                if(set!=null){
+                if (set != null) {
                     TopicMQ topicMQ = new TopicMQ();
                     topicMQ.setConsumerName(Thread.currentThread().getName());
                     List<TopicMQ> collect = set.stream().filter(item -> item.equals(topicMQ)).collect(Collectors.toList());
-                    if(!collect.isEmpty()){
+                    if (!collect.isEmpty()) {
 
                         ArrayBlockingQueue<String> queue = collect.get(0).getQueue();
-                        if(!queue.isEmpty()){
+                        if (!queue.isEmpty()) {
                             String msg = queue.poll();
                             System.out.println(Thread.currentThread().getName() + "消费消息" + msg);
                         }
