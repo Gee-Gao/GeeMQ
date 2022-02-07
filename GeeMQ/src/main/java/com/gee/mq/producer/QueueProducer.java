@@ -20,8 +20,8 @@ public class QueueProducer implements MQProducer {
     // 发送消息
     @GetMapping
     public void sendMsg(String queueName, String msg) {
-        if(StrUtil.isEmpty(queueName)){
-            throw new RuntimeException("主题名不能为空");
+        if (StrUtil.isEmpty(queueName)) {
+            throw new RuntimeException("队列名不能为空");
         }
 
         if (StrUtil.isEmpty(msg)) {
