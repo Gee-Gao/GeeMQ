@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
@@ -16,6 +19,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("producer/queue")
 public class QueueProducer implements MQProducer {
     private final MQManage mqManage;
+
+    // 获取待消费消息
+    @GetMapping("pendingMsg")
+    public List<String> pendingMsg(String queueName) {
+        if (StrUtil.isEmpty(queueName)) {
+            throw new RuntimeException("队列名不能为空");
+        }
+
+        QueueMQ queueMQ = mqManage.getQueueMqHashMap().get(queueName);
+        if (queueMQ == null) {
+            return new ArrayList<>(0);
+        } else {
+            ArrayBlockingQueue<String> queue = queueMQ.getQueue();
+            ArrayList<String> pendingMsg = new ArrayList<>(queue.size());
+            pendingMsg.addAll(queue);
+            return pendingMsg;
+        }
+    }
 
     // 发送消息
     @GetMapping
