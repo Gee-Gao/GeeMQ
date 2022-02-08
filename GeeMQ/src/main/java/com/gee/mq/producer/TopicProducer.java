@@ -14,9 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,31 @@ public class TopicProducer implements MQProducer {
 
     private final MQManage mqManage;
 
+    // 获取待消费消息
+    @GetMapping("pendingMsg")
+    public ArrayList<Map<String, Object>> pendingMsg(String topicName) {
+        if (StrUtil.isEmpty(topicName)) {
+            throw new RuntimeException("主题名不能为空");
+        }
+
+        Set<TopicMQ> set = mqManage.getTopicMqHashMap().get(topicName);
+        if (set == null || set.size() == 0) {
+            return new ArrayList<>(0);
+        } else {
+            ArrayList<Map<String, Object>> pendingMsg = new ArrayList<>(set.size());
+            set.forEach(item -> {
+                ArrayBlockingQueue<String> queue = item.getQueue();
+                ArrayList<String> list = new ArrayList<>(queue.size());
+                list.addAll(queue);
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("consumerName", item.getConsumerName());
+                map.put("pendingMessages", list);
+                pendingMsg.add(map);
+            });
+            return pendingMsg;
+        }
+    }
+
     // 发送消息
     @GetMapping
     public void sendMsg(String topicName, String msg) {
@@ -43,7 +67,7 @@ public class TopicProducer implements MQProducer {
         }
 
         List<String> consumerNames = mqConsumer.consumerNameByPrefix(TopicConsumer.CONSUMER_TOPIC_PREFIX);
-        System.out.println(consumerNames);
+
         ConcurrentHashMap<String, Set<TopicMQ>> topicMqHashMap = mqManage.getTopicMqHashMap();
         Set<TopicMQ> topicMQs = topicMqHashMap.get(topicName);
         if (topicMQs == null) {
