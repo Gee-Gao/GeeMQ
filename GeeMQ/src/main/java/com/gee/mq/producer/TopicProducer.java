@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashSet;
@@ -30,6 +31,7 @@ public class TopicProducer implements MQProducer {
 
     private final MQManage mqManage;
 
+    // 发送消息
     @GetMapping
     public void sendMsg(String topicName, String msg) {
         if (StrUtil.isEmpty(topicName)) {
@@ -67,5 +69,40 @@ public class TopicProducer implements MQProducer {
             }
         }
         topicMqHashMap.put(topicName, topicMQs);
+    }
+
+    // 延时发送消息
+    @GetMapping("/delay")
+    public void sendMsgDelay(String topicName, String msg, Long delay) {
+        if (delay == null) {
+            delay = 0L;
+        }
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        sendMsg(topicName, msg);
+    }
+
+    // 循环发送消息
+    @GetMapping("/loop")
+    public void sendMsgLoop(String topicName, String msg, Long loop, @RequestParam(required = false) Boolean firstWait) {
+        if (loop == null) {
+            throw new RuntimeException("请指定时间间隔");
+        }
+
+        if (firstWait == null || !firstWait) {
+            sendMsg(topicName, msg);
+        }
+
+        while (true) {
+            try {
+                Thread.sleep(loop);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sendMsg(topicName, msg);
+        }
     }
 }
