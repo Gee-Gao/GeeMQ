@@ -1,6 +1,7 @@
 package com.gee.mq.manage;
 
 import com.gee.mq.bean.Group;
+import com.gee.mq.bean.Result;
 import com.gee.mq.consumer.QueueConsumer;
 import com.gee.mq.consumer.TopicConsumer;
 import lombok.Data;
@@ -61,15 +62,15 @@ public class GroupManage {
 
     // 获取分组
     @GetMapping("getAllGroup")
-    public List<Group> getAllGroup() {
+    public Result getAllGroup() {
         List<Group> groups = new ArrayList<>();
         groupHashMap.forEach((k, v) -> groups.add(v));
-        return groups;
+        return Result.ok(groups);
     }
 
     // 根据名称获取指定分组
     @GetMapping("getGroupByName/{groupName}")
-    public Group getGroupByName(@PathVariable String groupName) {
-        return groupHashMap.get(groupName);
+    public Result getGroupByName(@PathVariable String groupName) {
+        return Result.ok(groupHashMap.get(groupName));
     }
 }

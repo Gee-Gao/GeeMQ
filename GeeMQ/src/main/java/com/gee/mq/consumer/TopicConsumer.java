@@ -2,6 +2,7 @@ package com.gee.mq.consumer;
 
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
+import com.gee.mq.bean.Result;
 import com.gee.mq.bean.TopicMQ;
 import com.gee.mq.manage.MQManage;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class TopicConsumer implements MQConsumer {
     public static final String CONSUMER_TOPIC_PREFIX = "CONSUMER-TOPIC:";
 
     @GetMapping
-    public void receiveMsg(String topicName, @RequestParam(required = false) Boolean realTime) {
+    public Result receiveMsg(String topicName, @RequestParam(required = false) Boolean realTime) {
 
         if (StrUtil.isEmpty(topicName)) {
             throw new RuntimeException("主题名不能为空");
@@ -38,12 +39,14 @@ public class TopicConsumer implements MQConsumer {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("消费者:{},启动失败", thread.getName());
+            return Result.error("消费者:" + thread.getName() + ",启动失败");
         }
+        return Result.ok();
     }
 
     // 生成一个指定名字的消费者
     @GetMapping("/{consumerName}")
-    public void receiveMsg(@PathVariable("consumerName") String consumerName, String topicName, @RequestParam(required = false) Boolean realTime) {
+    public Result receiveMsg(@PathVariable("consumerName") String consumerName, String topicName, @RequestParam(required = false) Boolean realTime) {
         consumerCountCheck(CONSUMER_TOPIC_PREFIX, consumerName);
 
         if (StrUtil.isEmpty(topicName)) {
@@ -57,27 +60,32 @@ public class TopicConsumer implements MQConsumer {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("消费者:{},启动失败", consumerName);
+            return Result.error("消费者:" + consumerName + ",启动失败");
         }
+        return Result.ok();
     }
 
-    private Thread consumerGenerateWithConsumerName(String consumerName, String topicName, Boolean isRealTime) {
-        Thread thread = consumerGenerate(topicName, isRealTime);
-        thread.setName(CONSUMER_TOPIC_PREFIX + topicName + ":" + consumerName);
-        return thread;
-    }
+
 
     // 停止消费者
     @GetMapping("/stop/{consumerName}")
-    public void stopQueueConsumer(@PathVariable String consumerName) {
+    public Result stopQueueConsumer(@PathVariable String consumerName) {
         stopConsumer(consumerName, CONSUMER_TOPIC_PREFIX);
+        return Result.ok();
     }
 
     // 获取当前所有消费者线程名字
     @GetMapping("/getConsumerName")
+    public Result getConsumerName() {
+        return Result.ok(consumerThreadName());
+    }
+
+    // 获取消费者名称
     public List<String> consumerThreadName() {
         return consumerNameByPrefix(CONSUMER_TOPIC_PREFIX);
     }
 
+    // 生成消费者线程
     private Thread consumerGenerate(String topicName, Boolean isRealTime) {
         if (isRealTime == null) {
             isRealTime = false;
@@ -114,5 +122,12 @@ public class TopicConsumer implements MQConsumer {
                 }
             }
         }, CONSUMER_TOPIC_PREFIX + topicName + ":" + UUID.fastUUID());
+    }
+
+    // 生成指定名字消费者线程
+    private Thread consumerGenerateWithConsumerName(String consumerName, String topicName, Boolean isRealTime) {
+        Thread thread = consumerGenerate(topicName, isRealTime);
+        thread.setName(CONSUMER_TOPIC_PREFIX + topicName + ":" + consumerName);
+        return thread;
     }
 }

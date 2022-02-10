@@ -1,6 +1,8 @@
 package com.gee.mq.producer;
 
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
+import com.gee.mq.bean.Result;
 import com.gee.mq.bean.TopicMQ;
 import com.gee.mq.consumer.MQConsumer;
 import com.gee.mq.consumer.TopicConsumer;
@@ -30,16 +32,18 @@ public class TopicProducer implements MQProducer {
 
     private final MQManage mqManage;
 
+    public static final String PRODUCER_TOPIC_PREFIX = "PRODUCER-TOPIC";
+
     // 获取待消费消息
     @GetMapping("pendingMsg")
-    public ArrayList<Map<String, Object>> pendingMsg(String topicName) {
+    public Result pendingMsg(String topicName) {
         if (StrUtil.isEmpty(topicName)) {
             throw new RuntimeException("主题名不能为空");
         }
 
         Set<TopicMQ> set = mqManage.getTopicMqHashMap().get(topicName);
         if (set == null || set.size() == 0) {
-            return new ArrayList<>(0);
+            return Result.ok(new ArrayList<>(0));
         } else {
             ArrayList<Map<String, Object>> pendingMsg = new ArrayList<>(set.size());
             set.forEach(item -> {
@@ -51,7 +55,8 @@ public class TopicProducer implements MQProducer {
                 map.put("pendingMessages", list);
                 pendingMsg.add(map);
             });
-            return pendingMsg;
+
+            return Result.ok(pendingMsg);
         }
     }
 
@@ -78,7 +83,6 @@ public class TopicProducer implements MQProducer {
                 topicMQ.getQueue().add(msg);
                 topicMQs.add(topicMQ);
             }
-
         } else {
             for (String consumerName : consumerNames) {
                 TopicMQ topicMQ = new TopicMQ();
@@ -92,26 +96,34 @@ public class TopicProducer implements MQProducer {
                 }
             }
         }
+
         topicMqHashMap.put(topicName, topicMQs);
     }
 
     // 延时发送消息
     @GetMapping("/delay")
-    public void sendMsgDelay(String topicName, String msg, Long delay) {
+    public Result sendMsgDelay(String topicName, String msg, Long delay) {
         if (delay == null) {
             delay = 0L;
         }
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        sendMsg(topicName, msg);
+
+        Long finalDelay = delay;
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(finalDelay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sendMsg(topicName, msg);
+        }, PRODUCER_TOPIC_PREFIX + topicName + ":" + UUID.fastUUID()).start();
+
+        return Result.ok();
     }
 
     // 循环发送消息
     @GetMapping("/loop")
-    public void sendMsgLoop(String topicName, String msg, Long loop, @RequestParam(required = false) Boolean firstWait) {
+    public Result sendMsgLoop(String topicName, String msg, Long loop, @RequestParam(required = false) Boolean firstWait) {
         if (loop == null) {
             throw new RuntimeException("请指定时间间隔");
         }
@@ -120,13 +132,17 @@ public class TopicProducer implements MQProducer {
             sendMsg(topicName, msg);
         }
 
-        while (true) {
-            try {
-                Thread.sleep(loop);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    Thread.sleep(loop);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendMsg(topicName, msg);
             }
-            sendMsg(topicName, msg);
-        }
+        }, PRODUCER_TOPIC_PREFIX + topicName + ":" + UUID.fastUUID()).start();
+
+        return Result.ok();
     }
 }

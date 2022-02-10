@@ -3,6 +3,7 @@ package com.gee.mq.consumer;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
 import com.gee.mq.bean.QueueMQ;
+import com.gee.mq.bean.Result;
 import com.gee.mq.manage.MQManage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,7 @@ public class QueueConsumer implements MQConsumer {
 
     // 生成一个消费者
     @GetMapping
-    public void receiveMsg(String queueName, @RequestParam(required = false) Boolean realTime) {
-
+    public Result receiveMsg(String queueName, @RequestParam(required = false) Boolean realTime) {
         if (StrUtil.isEmpty(queueName)) {
             throw new RuntimeException("队列名不能为空");
         }
@@ -36,16 +36,18 @@ public class QueueConsumer implements MQConsumer {
 
         try {
             thread.start();
-            log.debug("消费者:{},启动", thread.getName());
+            log.info("消费者:{},启动", thread.getName());
         } catch (Exception e) {
             e.printStackTrace();
             log.error("消费者:{},启动失败", thread.getName());
+            return Result.error("消费者:" + thread.getName() + ",启动失败");
         }
+        return Result.ok();
     }
 
     // 生成一个指定名字的消费者
     @GetMapping("/{consumerName}")
-    public void receiveMsg(@PathVariable("consumerName") String consumerName, String queueName, @RequestParam(required = false) Boolean realTime) {
+    public Result receiveMsg(@PathVariable("consumerName") String consumerName, String queueName, @RequestParam(required = false) Boolean realTime) {
         consumerCountCheck(CONSUMER_QUEUE_PREFIX, consumerName);
 
         if (StrUtil.isEmpty(queueName)) {
@@ -59,26 +61,35 @@ public class QueueConsumer implements MQConsumer {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("消费者:{},启动失败", consumerName);
+            return Result.error("消费者:" + consumerName + ",启动失败");
         }
+        return Result.ok();
     }
 
     // 获取当前所有消费者线程名字
     @GetMapping("/getConsumerName")
-    public List<String> consumerThreadName() {
-        return consumerNameByPrefix(CONSUMER_QUEUE_PREFIX);
+    public Result getConsumerName() {
+        return Result.ok(consumerThreadName());
     }
 
     // 停止消费者
     @GetMapping("/stop/{consumerName}")
-    public void stopQueueConsumer(@PathVariable String consumerName) {
+    public Result stopQueueConsumer(@PathVariable String consumerName) {
         stopConsumer(consumerName, CONSUMER_QUEUE_PREFIX);
+        return Result.ok();
     }
 
+
     // 生成指定名字消费者线程
-    public Thread consumerGenerateWithConsumerName(String consumerName, String queueName, Boolean realTime) {
+    private Thread consumerGenerateWithConsumerName(String consumerName, String queueName, Boolean realTime) {
         Thread thread = consumerGenerate(queueName, realTime);
         thread.setName(CONSUMER_QUEUE_PREFIX + queueName + ":" + consumerName);
         return thread;
+    }
+
+    // 获取消费者名称
+    public List<String> consumerThreadName() {
+        return consumerNameByPrefix(CONSUMER_QUEUE_PREFIX);
     }
 
     // 生成消费者线程
