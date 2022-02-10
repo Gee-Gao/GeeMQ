@@ -6,10 +6,7 @@ import com.gee.mq.bean.QueueMQ;
 import com.gee.mq.bean.Result;
 import com.gee.mq.manage.MQManage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -19,7 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @RequestMapping("producer/queue")
 public class QueueProducer implements MQProducer {
-    public static final String PRODUCER_QUEUE_PREFIX = "PRODUCER-QUEUE:";
+    public static final String PRODUCER_QUEUE_LOOP_PREFIX = "PRODUCER-QUEUE-LOOP:";
+    public static final String PRODUCER_QUEUE_DELAY_PREFIX = "PRODUCER-QUEUE-DELAY:";
     private final MQManage mqManage;
 
     // 获取待消费消息
@@ -80,7 +78,7 @@ public class QueueProducer implements MQProducer {
                 e.printStackTrace();
             }
             sendMsg(queueName, msg);
-        }, PRODUCER_QUEUE_PREFIX + queueName + ":" + UUID.fastUUID()).start();
+        }, PRODUCER_QUEUE_DELAY_PREFIX + queueName + ":" + UUID.fastUUID()).start();
 
         return Result.ok();
     }
@@ -105,7 +103,20 @@ public class QueueProducer implements MQProducer {
                 }
                 sendMsg(queueName, msg);
             }
-        }, PRODUCER_QUEUE_PREFIX + queueName + ":" + UUID.fastUUID()).start();
+        }, PRODUCER_QUEUE_LOOP_PREFIX + queueName + ":" + UUID.fastUUID()).start();
+        return Result.ok();
+    }
+
+    // 获取循环发送消息的生产者
+    @GetMapping("/getLoopProducer")
+    public Result getLoopProducer() {
+        return Result.ok(producerNameByPrefix(PRODUCER_QUEUE_LOOP_PREFIX));
+    }
+
+    // 根据名称停止循环发送消息的生产者
+    @GetMapping("/stopLoopProducerByName/{producerName}")
+    public Result stopLoopProducerByName(@PathVariable String producerName) {
+        stopProducer(producerName, PRODUCER_QUEUE_LOOP_PREFIX);
         return Result.ok();
     }
 }

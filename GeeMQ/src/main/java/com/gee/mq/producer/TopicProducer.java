@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -32,7 +29,8 @@ public class TopicProducer implements MQProducer {
 
     private final MQManage mqManage;
 
-    public static final String PRODUCER_TOPIC_PREFIX = "PRODUCER-TOPIC";
+    public static final String PRODUCER_TOPIC_LOOP_PREFIX = "PRODUCER-TOPIC-LOOP:";
+    public static final String PRODUCER_TOPIC_DELAY_PREFIX = "PRODUCER-TOPIC-DELAY:";
 
     // 获取待消费消息
     @GetMapping("pendingMsg")
@@ -116,7 +114,7 @@ public class TopicProducer implements MQProducer {
                 e.printStackTrace();
             }
             sendMsg(topicName, msg);
-        }, PRODUCER_TOPIC_PREFIX + topicName + ":" + UUID.fastUUID()).start();
+        }, PRODUCER_TOPIC_DELAY_PREFIX + topicName + ":" + UUID.fastUUID()).start();
 
         return Result.ok();
     }
@@ -141,8 +139,21 @@ public class TopicProducer implements MQProducer {
                 }
                 sendMsg(topicName, msg);
             }
-        }, PRODUCER_TOPIC_PREFIX + topicName + ":" + UUID.fastUUID()).start();
+        }, PRODUCER_TOPIC_DELAY_PREFIX + topicName + ":" + UUID.fastUUID()).start();
 
+        return Result.ok();
+    }
+
+    // 获取循环发送消息的生产者
+    @GetMapping("/getLoopProducer")
+    public Result getLoopProducer() {
+        return Result.ok(producerNameByPrefix(PRODUCER_TOPIC_LOOP_PREFIX));
+    }
+
+    // 根据名称停止循环发送消息的生产者
+    @GetMapping("/stopLoopProducerByName/{producerName}")
+    public Result stopLoopProducerByName(@PathVariable String producerName) {
+        stopProducer(producerName, PRODUCER_TOPIC_LOOP_PREFIX);
         return Result.ok();
     }
 }
