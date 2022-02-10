@@ -7,7 +7,9 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Data
 @Component
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("group")
 public class GroupManage {
@@ -28,7 +31,7 @@ public class GroupManage {
     private final TopicConsumer topicConsumer;
 
     // 消费者分组
-    @GetMapping("queue")
+    @GetMapping
     public void groupConsumer(String groupName, Set<String> consumerNames) {
         List<String> queueConsumerNameList = queueConsumer.consumerThreadName();
         List<String> topicConsumerNameList = topicConsumer.consumerThreadName();
@@ -54,5 +57,19 @@ public class GroupManage {
                     .collect(Collectors.toSet());
             consumers.addAll(collect);
         }
+    }
+
+    // 获取分组
+    @GetMapping("getAllGroup")
+    public List<Group> getAllGroup() {
+        List<Group> groups = new ArrayList<>();
+        groupHashMap.forEach((k, v) -> groups.add(v));
+        return groups;
+    }
+
+    // 根据名称获取指定分组
+    @GetMapping("getGroupByName/{groupName}")
+    public Group getGroupByName(@PathVariable String groupName) {
+        return groupHashMap.get(groupName);
     }
 }
