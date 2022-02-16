@@ -73,4 +73,29 @@ public class GroupManage {
     public Result getGroupByName(@PathVariable String groupName) {
         return Result.ok(groupHashMap.get(groupName));
     }
+
+    // 根据组名停止消费者
+    @GetMapping("stopGroup/{groupName}")
+    public Result stopGroup(@PathVariable String groupName) {
+        Group group = groupHashMap.get(groupName);
+        if (group != null) {
+            Set<String> consumers = group.getConsumers();
+
+            List<Thread> queueThreads = queueConsumer.consumerThreads(QueueConsumer.CONSUMER_QUEUE_PREFIX);
+            List<Thread> topicThreads = topicConsumer.consumerThreads(TopicConsumer.CONSUMER_TOPIC_PREFIX);
+            List<Thread> allThread = new ArrayList<>(queueThreads.size() + topicThreads.size());
+
+            allThread.addAll(queueThreads);
+            allThread.addAll(topicThreads);
+
+            consumers.forEach(waitStopConsumerName ->
+                    allThread.forEach(consumer -> {
+                        if (consumer.getName().equals(waitStopConsumerName)) {
+                            consumer.interrupt();
+                        }
+                    })
+            );
+        }
+        return Result.ok();
+    }
 }
