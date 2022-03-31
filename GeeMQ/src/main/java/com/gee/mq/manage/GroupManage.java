@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,6 +96,50 @@ public class GroupManage {
                         }
                     })
             );
+        }
+        return Result.ok();
+    }
+
+    // 生成分组
+    @GetMapping("generateGroup")
+    public Result generateGroup(String groupName, String type, String queueOrTopicName, Integer count, Boolean realTime) {
+        if (groupName == null) {
+            throw new RuntimeException("分组名不能为空");
+        }
+
+        if (type == null) {
+            throw new RuntimeException("类型不能为空");
+        }
+
+        if (queueOrTopicName == null) {
+            throw new RuntimeException("队列名或主题名不能为空");
+        }
+
+        if (count <= 0) {
+            throw new RuntimeException("消费者数量错误");
+        }
+
+        if (realTime == null) {
+            realTime = false;
+        }
+        Set<String> consumerNames = new HashSet<>(count);
+
+        if ("group".equals(type)) {
+            for (int i = 0; i < count; i++) {
+                Thread thread = queueConsumer.consumerGenerate(queueOrTopicName, realTime);
+                consumerNames.add(thread.getName());
+            }
+        }
+
+        if ("topic".equals(type)) {
+            for (int i = 0; i < count; i++) {
+                Thread thread = topicConsumer.consumerGenerate(queueOrTopicName, realTime);
+                consumerNames.add(thread.getName());
+            }
+        }
+
+        if (!consumerNames.isEmpty()) {
+            groupConsumer(groupName,consumerNames);
         }
         return Result.ok();
     }

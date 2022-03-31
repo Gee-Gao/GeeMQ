@@ -93,7 +93,7 @@ public class QueueConsumer implements MQConsumer {
     }
 
     // 生成消费者线程
-    private Thread consumerGenerate(String queueName, Boolean isRealTime) {
+    public Thread consumerGenerate(String queueName, Boolean isRealTime) {
         if (isRealTime == null) {
             isRealTime = false;
         }
