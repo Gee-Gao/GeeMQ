@@ -20,6 +20,21 @@ public class QueueProducer implements MQProducer {
     public static final String PRODUCER_QUEUE_DELAY_PREFIX = "PRODUCER-QUEUE-DELAY:";
     private final MQManage mqManage;
 
+    // 获取待消费消息数量
+    @GetMapping("pendingMsgCountByName")
+    public Result pendingMsgCountByName(String queueName) {
+        if (StrUtil.isEmpty(queueName)) {
+            throw new RuntimeException("队列名不能为空");
+        }
+
+        QueueMQ queueMQ = mqManage.getQueueMqHashMap().get(queueName);
+        if (queueMQ == null) {
+            return Result.ok(0);
+        } else {
+            return Result.ok(queueMQ.getQueue().size());
+        }
+    }
+
     // 获取待消费消息
     @GetMapping("pendingMsg")
     public Result pendingMsg(String queueName) {

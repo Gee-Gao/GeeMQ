@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +32,26 @@ public class TopicProducer implements MQProducer {
 
     public static final String PRODUCER_TOPIC_LOOP_PREFIX = "PRODUCER-TOPIC-LOOP:";
     public static final String PRODUCER_TOPIC_DELAY_PREFIX = "PRODUCER-TOPIC-DELAY:";
+
+    // 获取待消费消息数量
+    @GetMapping("pendingMsgCountByName")
+    public Result pendingMsgCountByName(String topicName) {
+        if (StrUtil.isEmpty(topicName)) {
+            throw new RuntimeException("主题名不能为空");
+        }
+
+        Set<TopicMQ> set = mqManage.getTopicMqHashMap().get(topicName);
+        if (set == null || set.size() == 0) {
+            return Result.ok(0);
+        } else {
+            AtomicInteger allMessageCount = new AtomicInteger();
+            set.forEach(item -> {
+                int size = item.getQueue().size();
+                allMessageCount.addAndGet(size);
+            });
+            return Result.ok(allMessageCount);
+        }
+    }
 
     // 获取待消费消息
     @GetMapping("pendingMsg")
