@@ -9,6 +9,8 @@ public class User {
    private String username;
    private String password;
 
+   private String newPassword;
+
    @Override
    public boolean equals(Object o) {
       if (this == o) return true;

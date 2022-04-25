@@ -49,6 +49,32 @@ public class UserManage {
         allUsers.add(consumerManage);
     }
 
+    @PostMapping("register")
+    public Result changePassword(User user) {
+        if (user.getUsername() == null) {
+            throw new RuntimeException("账号不能为空");
+        }
+
+        if (user.getPassword() == null) {
+            throw new RuntimeException("密码不能为空");
+        }
+
+        long count = allUsers.stream().filter(item -> item.equals(user)).count();
+
+        if(count==0){
+            throw new RuntimeException("账号或密码错误");
+        }
+
+        if(user.getNewPassword()==null){
+            throw new RuntimeException("新密码不能为空");
+        }
+
+        allUsers.stream().filter(item -> item.equals(user)).forEach(item->item.setPassword(user.getPassword()));
+
+        return Result.ok();
+    }
+
+
     @PostMapping("login")
     public Result login(User user) {
         long count = allUsers.stream().filter(item -> item.equals(user)).count();
@@ -69,7 +95,7 @@ public class UserManage {
             throw new RuntimeException("密码不能为空");
         }
 
-        long count = allUsers.stream().filter(item -> item.equals(user)).count();
+        long count = allUsers.stream().filter(item -> item.getUsername().equals(user.getUsername())).count();
 
         if (count > 0) {
             throw new RuntimeException("用户已存在");
