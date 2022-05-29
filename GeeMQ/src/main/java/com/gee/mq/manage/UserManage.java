@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 
@@ -49,7 +50,7 @@ public class UserManage {
         allUsers.add(consumerManage);
     }
 
-    @PostMapping("register")
+    @PostMapping("changePassword")
     public Result changePassword(User user) {
         if (user.getUsername() == null) {
             throw new RuntimeException("账号不能为空");
@@ -104,4 +105,20 @@ public class UserManage {
         allUsers.add(user);
         return Result.ok();
     }
+
+    @PostMapping("deleteUser")
+    public Result deleteUser(User user){
+        long count = allUsers.stream().filter(item -> item.equals(user)).count();
+
+        if(count==0){
+            throw new RuntimeException("账号或密码错误");
+        }
+
+        allUsers= allUsers.stream()
+                .filter(item -> !item.equals(user))
+                .collect(Collectors.toList());
+
+        return Result.ok();
+    }
+
 }
