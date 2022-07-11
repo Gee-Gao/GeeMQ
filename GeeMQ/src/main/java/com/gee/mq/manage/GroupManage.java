@@ -32,7 +32,14 @@ public class GroupManage {
 
     private final TopicConsumer topicConsumer;
 
-    // 消费者分组
+    /**
+     * @description 消费者分组
+     *
+	 * @param groupName 组名
+	 * @param consumerNames 消费者名称
+     * @author Gee
+     * @createTime 2022/7/11 20:41
+     */
     @GetMapping
     public void groupConsumer(String groupName, Set<String> consumerNames) {
         List<String> queueConsumerNameList = queueConsumer.consumerThreadName();
@@ -61,7 +68,13 @@ public class GroupManage {
         }
     }
 
-    // 获取分组
+    /**
+     * @description 获取所有分组
+     *
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:42
+     */
     @GetMapping("getAllGroup")
     public Result getAllGroup() {
         List<Group> groups = new ArrayList<>();
@@ -69,13 +82,27 @@ public class GroupManage {
         return Result.ok(groups);
     }
 
-    // 根据名称获取指定分组
+    /**
+     * @description 根据名称获取指定分组
+     *
+	 * @param groupName 组名
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:42
+     */
     @GetMapping("getGroupByName/{groupName}")
     public Result getGroupByName(@PathVariable String groupName) {
         return Result.ok(groupHashMap.get(groupName));
     }
 
-    // 根据组名停止消费者
+    /**
+     * @description 根据组名停止消费者
+     *
+	 * @param groupName 组名
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:42
+     */
     @GetMapping("stopGroup/{groupName}")
     public Result stopGroup(@PathVariable String groupName) {
         Group group = groupHashMap.get(groupName);
@@ -100,7 +127,18 @@ public class GroupManage {
         return Result.ok();
     }
 
-    // 生成分组
+    /**
+     * @description 生成分组
+     *
+	 * @param groupName 组名
+	 * @param type 分组类型（queue/topic）
+	 * @param queueOrTopicName 队列或者主题名
+	 * @param count 分组数量
+	 * @param realTime 是否实时
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:43
+     */
     @GetMapping("generateGroup")
     public Result generateGroup(String groupName, String type, String queueOrTopicName, Integer count, Boolean realTime) {
         if (groupName == null) {
@@ -124,7 +162,7 @@ public class GroupManage {
         }
         Set<String> consumerNames = new HashSet<>(count);
 
-        if ("group".equals(type)) {
+        if ("queue".equals(type)) {
             for (int i = 0; i < count; i++) {
                 Thread thread = queueConsumer.consumerGenerate(queueOrTopicName, realTime);
                 consumerNames.add(thread.getName());

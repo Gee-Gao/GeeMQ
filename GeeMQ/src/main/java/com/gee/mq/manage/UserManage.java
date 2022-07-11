@@ -50,6 +50,14 @@ public class UserManage {
         allUsers.add(consumerManage);
     }
 
+    /**
+     * @description  修改密码
+     *
+	 * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:39
+     */
     @PostMapping("changePassword")
     public Result changePassword(User user) {
         if (user.getUsername() == null) {
@@ -75,7 +83,14 @@ public class UserManage {
         return Result.ok();
     }
 
-
+    /**
+     * @description  登录
+     *
+     * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:39
+     */
     @PostMapping("login")
     public Result login(User user) {
         long count = allUsers.stream().filter(item -> item.equals(user)).count();
@@ -86,6 +101,14 @@ public class UserManage {
         }
     }
 
+    /**
+     * @description  注册
+     *
+     * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:39
+     */
     @PostMapping("register")
     public Result register(User user) {
         if (user.getUsername() == null) {
@@ -106,6 +129,14 @@ public class UserManage {
         return Result.ok();
     }
 
+    /**
+     * @description 删除用户
+     *
+	 * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:40
+     */
     @PostMapping("deleteUser")
     public Result deleteUser(User user){
         long count = allUsers.stream().filter(item -> item.equals(user)).count();

@@ -11,7 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Data
 public class MQManage {
+    // 队列管理
     private volatile ConcurrentHashMap<String, QueueMQ> queueMqHashMap = new ConcurrentHashMap<>(1024);
 
+    // 主题管理
     private volatile ConcurrentHashMap<String, Set<TopicMQ>> topicMqHashMap = new ConcurrentHashMap<>(1024);
 }
