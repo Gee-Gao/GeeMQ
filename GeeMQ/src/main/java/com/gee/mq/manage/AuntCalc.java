@@ -22,18 +22,29 @@ public class AuntCalc {
             LocalDate localDate = LocalDate.parse(dateStr, formatter);
             list.add(localDate);
         }
-
+        LocalDate first = list.get(0);
+        LocalDate second = list.get(1);
+        long min = first.until(second, ChronoUnit.DAYS);
+        long max = min;
         long sum = 0L;
         for (int i = 0; i < list.size() - 1; i++) {
             LocalDate before = list.get(i);
             LocalDate after = list.get(i + 1);
             long until = before.until(after, ChronoUnit.DAYS);
+            if (until < min) {
+                min = until;
+            }
+            if (until > max) {
+                max = until;
+            }
             sum += until;
             System.out.println(before.getYear() + "年" + before.getMonthValue() + "月到" + after.getMonthValue() + "月相差" + until + "天");
         }
 
         BigDecimal average = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
-        System.out.println("平均间隔：" + average+"天");
+        System.out.println("最小间隔: " + min + "天");
+        System.out.println("最大间隔: " + max + "天");
+        System.out.println("平均间隔: " + average + "天");
         BigDecimal nextDays = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP);
         System.out.println("预计下次" + list.get(list.size() - 1).plusDays(nextDays.longValue()));
     }
