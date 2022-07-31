@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>Hello MUI</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="stylesheet" href="../css/mui.min.css">
+        <style>
+            .mui-input-group {
+                margin-top: 10px;
+            }
+
+            .mui-input-group:first-child {
+                margin-top: 20px;
+            }
+
+            .mui-input-group label {
+                width: 22%;
+            }
+
+            .mui-input-row label ~ input,
+            .mui-input-row label ~ select,
+            .mui-input-row label ~ textarea {
+                width: 78%;
+            }
+
+            .mui-checkbox input[type=checkbox],
+            .mui-radio input[type=radio] {
+                top: 6px;
+            }
+
+            .mui-content-padded {
+                margin-top: 25px;
+            }
+
+            .mui-btn {
+                padding: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header class="mui-bar mui-bar-nav">
+            <h1 class="mui-title">注册</h1>
+        </header>
+        <div class="mui-content">
+            <form id='login-form' class="mui-input-group">
+                <div class="mui-input-row">
+                    <label for="username">账号</label>
+                    <input id='username' type="text" autocomplete="off" class="mui-input-clear mui-input"
+                           placeholder="请输入账号">
+                </div>
+                <div class="mui-input-row">
+                    <label for="name">姓名</label>
+                    <input id='name' type="text" autocomplete="off" class="mui-input-clear mui-input"
+                           placeholder="请输入姓名">
+                </div>
+                <div class="mui-input-row">
+                    <label for="password">密码</label>
+                    <input id='password' type="password" autocomplete="off" class="mui-input-clear mui-input"
+                           placeholder="请输入密码">
+                </div>
+
+                <div class="mui-input-row" style="height: 7vh">
+                    <label for="password">确认<br/>密码</label>
+                    <input style="height:7vh" id='checkPassword' type="password" autocomplete="off"
+                           class="mui-input-clear mui-input"
+                           placeholder="请确认密码">
+                </div>
+            </form>
+
+            <div class="mui-content-padded">
+                <a id='register' style="width:  40% ;float: left"
+                   class="mui-btn mui-btn-block mui-btn-primary">点击注册</a>
+                <a id='toLogin' style="width:  40%;float: left;margin-left: 20%"
+                   class="mui-btn mui-btn-block mui-btn-success">跳转登录</a>
+            </div>
+        </div>
+        <script src="../js/mui.min.js"></script>
+        <script>
+
+            document.getElementById("register").addEventListener("tap", function () {
+                let username = document.getElementById("username").value;
+                let name = document.getElementById("name").value;
+                let password = document.getElementById("password").value;
+                let checkPassword = document.getElementById("checkPassword").value;
+
+                if (!username) {
+                    mui.toast('账号不能为空', {duration: 1500, type: 'div'})
+                }
+
+                if (!name) {
+                    mui.toast('姓名不能为空', {duration: 1500, type: 'div'})
+                }
+
+                if (!password) {
+                    mui.toast('密码不能为空', {duration: 1500, type: 'div'})
+                }
+
+                if (checkPassword !== password) {
+                    mui.toast('两次密码不一致', {duration: 1500, type: 'div'})
+                }
+
+                let userinfo = {
+                    "username": username,
+                    "password": password,
+                    "name": name
+                }
+                mui.post("../user/calc/register", userinfo, function (data) {
+                    if (data.code === 200) {
+                        mui.toast('注册成功,跳转登录', {duration: 1500, type: 'div'})
+                    } else {
+                        mui.toast(data.msg, {duration: 1500, type: 'div'})
+                    }
+                })
+            })
+
+            document.getElementById("toLogin").addEventListener("tap", function () {
+                mui.openWindow({
+                    url: 'login.html',
+                    id: 'login'
+                });
+            })
+        </script>
+
+        <script>
+        </script>
+    </body>
+
+</html>

@@ -1,13 +1,13 @@
 package com.gee;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@MapperScan("com.gee.mq.mapper")
 public class GeeMqApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(GeeMqApplication.class, args);
     }
-
 }
