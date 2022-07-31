@@ -21,7 +21,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> {
             throw new GeeException("账号不存在");
         }
 
-        if (!one.getPassword().equals(MD5.create().digestHex(user.getPassword() + user.getSalt()))) {
+        if (!one.getPassword().equals(MD5.create().digestHex(user.getPassword() + one.getSalt()))) {
             throw new GeeException("密码错误");
         }
     }

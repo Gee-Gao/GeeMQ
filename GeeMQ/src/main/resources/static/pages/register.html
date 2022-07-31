@@ -109,9 +109,9 @@
                     "password": password,
                     "name": name
                 }
-                mui.post("../user/calc/register", userinfo, function (data) {
+                mui.post(serverAddr + "/user/calc/register", userinfo, function (data) {
                     if (data.code === 200) {
-                        mui.toast('注册成功,跳转登录', {duration: 1500, type: 'div'})
+                        mui.toast('注册成功', {duration: 1500, type: 'div'})
                     } else {
                         mui.toast(data.msg, {duration: 1500, type: 'div'})
                     }
@@ -124,9 +124,6 @@
                     id: 'login'
                 });
             })
-        </script>
-
-        <script>
         </script>
     </body>
 

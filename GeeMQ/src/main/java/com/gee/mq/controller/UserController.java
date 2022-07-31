@@ -4,10 +4,12 @@ import com.gee.mq.bean.Result;
 import com.gee.mq.bean.User;
 import com.gee.mq.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user/calc")

@@ -126,6 +126,7 @@
             </div>
         </div>
         <script src="../js/mui.min.js"></script>
+        <script src="../js/config.js"></script>
         <script>
             let autoLogin = false;
             // 自动登录开关
@@ -136,14 +137,20 @@
             document.getElementById("login").addEventListener("tap", function () {
                 let username = document.getElementById("username").value;
                 let password = document.getElementById("password").value;
-                console.log(username)
-                console.log(password)
+
                 let userinfo = {
                     "username": username,
                     "password": password
                 }
-                mui.post("../user/calc/login", userinfo, function (data) {
-
+                mui.post(serverAddr + "/user/calc/login", userinfo, function (data) {
+                    if (data.code === 200) {
+                        mui.openWindow({
+                            url: 'index.html',
+                            id: 'index'
+                        });
+                    } else {
+                        mui.toast(data.msg, {duration: 1500, type: 'div'})
+                    }
                 })
             })
             // 注册按钮
@@ -155,9 +162,6 @@
                 });
             });
 
-        </script>
-
-        <script>
         </script>
     </body>
 
