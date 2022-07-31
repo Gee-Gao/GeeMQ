@@ -41,7 +41,7 @@
 		init: function(element, options) {
 			this.view = this.element = element;
 			this.options = $.extend({
-				animateNavbar: 'ios', //ios
+				animateNavbar: true,
 				swipeBackPageActiveArea: 30,
 				hardwareAccelerated: true
 			}, options);
@@ -64,7 +64,7 @@
 
 			this._initDefaultPage();
 
-			this.navbars && this._initNavBar();
+			this._initNavBar();
 
 			this.initEvent();
 		},
@@ -122,19 +122,19 @@
 			return shadow;
 		}(),
 		_removePage: function(page, navbar) {
-			navbar && this._removeNavbar(page, navbar);
+			this._removeNavbar(page, navbar);
 			document.body.appendChild(page);
 			this._cleanPageClass(page);
 		},
 		_prependPage: function(page) {
 			var navbar = page.querySelector(SELECTOR_NAVBAR_INNER);
-			navbar && this._prependNavbar(navbar);
+			this._prependNavbar(navbar);
 			page.classList.add(CLASS_PAGE_LEFT);
 			this.pages.insertBefore(page, this.pages.firstElementChild);
 		},
 		_appendPage: function(page) {
 			var navbar = page.querySelector(SELECTOR_NAVBAR_INNER);
-			navbar && this._appendNavbar(navbar);
+			this._appendNavbar(navbar);
 			page.classList.add(CLASS_PAGE_CENTER);
 			this.pages.appendChild(page);
 		},
@@ -190,9 +190,6 @@
 				el.style.opacity = '';
 			}
 		},
-		_isAnimateNavbarIOS: function() {
-			return !$.os.android && this.options.animateNavbar === 'ios';
-		},
 		_webkitTransitionEnd: function(event) {
 			this.dragging = this.moved = false;
 			if (this.activePage !== event.target) {
@@ -206,7 +203,7 @@
 			this.activePageClassList.remove(CLASS_TRANSITIONING);
 
 			var self = this;
-			if (this._isAnimateNavbarIOS() && this.previousNavElements && this.activeNavElements) {
+			if ($.os.ios && this.options.animateNavbar && this.previousNavElements && this.activeNavElements) {
 				var isBack = this.isBack;
 				$.each(this.previousNavElements, function(i, el) {
 					el.classList.remove(CLASS_TRANSITIONING);
@@ -225,8 +222,8 @@
 					this._cleanStyle(this.activeNavBackIcon);
 				}
 			} else {
-				this.previousNavbar && this.previousNavbar.classList.remove(CLASS_TRANSITIONING);
-				this.activeNavbar && this.activeNavbar.classList.remove(CLASS_TRANSITIONING);
+				this.previousNavbar.classList.remove(CLASS_TRANSITIONING);
+				this.activeNavbar.classList.remove(CLASS_TRANSITIONING);
 				this._cleanStyle(this.previousNavbar);
 				this._cleanStyle(this.activeNavbar);
 			}
@@ -241,14 +238,12 @@
 				this._removePage(this.activePage, this.activeNavbar);
 				this.previousPageClassList.remove(CLASS_PAGE_LEFT);
 				this.previousPageClassList.add(CLASS_PAGE_CENTER);
-				if (this.previousNavbar) {
-					this.previousNavbar.classList.remove(CLASS_NAVBAR_LEFT);
-					this.previousNavbar.classList.add(CLASS_NAVBAR_CENTER);
-				}
+				this.previousNavbar.classList.remove(CLASS_NAVBAR_LEFT);
+				this.previousNavbar.classList.add(CLASS_NAVBAR_CENTER);
 				if (this.history.length > 0) {
 					this._prependPage(this.history.pop());
 				}
-				this.navbars && this._initNavBar();
+				this._initNavBar();
 				this._trigger('pageBack', this.activePage);
 				this._trigger('pageShow', this.previousPage);
 			} else {
@@ -271,7 +266,7 @@
 					cancelable: true
 				});
 				for (var len = callbacks.length; len--;) {
-					callbacks[len].call(this, event);
+					callbacks[len].apply(this, event);
 				}
 			}
 			$.trigger(this.view, eventType, {
@@ -292,10 +287,10 @@
 				this.previousPageClassList.remove(CLASS_TRANSITIONING);
 				this.activePageClassList.remove(CLASS_TRANSITIONING);
 
-				if (this.navbars) {
+				if (this.options.animateNavbar && this.navbars) {
 					this.previousNavbar = this.navbars.querySelector(SELECTOR_NAVBAR_LEFT);
 					this.activeNavbar = this.navbars.querySelector(SELECTOR_NAVBAR_CENTER);
-					if (this._isAnimateNavbarIOS() && this.previousNavbar && this.activeNavbar) {
+					if (this.previousNavbar && this.activeNavbar) {
 						this.previousNavElements = this.previousNavbar.querySelectorAll(SELECTOR_LEFT + ',' + SELECTOR_CENTER + ',' + SELECTOR_RIGHT);
 						this.activeNavElements = this.activeNavbar.querySelectorAll(SELECTOR_LEFT + ',' + SELECTOR_CENTER + ',' + SELECTOR_RIGHT);
 						this.previousNavBackIcon = this.previousNavbar.querySelector(SELECTOR_LEFT + SELECTOR_BTN_NAV + ' ' + SELECTOR_ICON);
@@ -309,7 +304,7 @@
 			return false;
 		},
 		_initNavBar: function() {
-			if (this._isAnimateNavbarIOS() && this.navbars) {
+			if (this.options.animateNavbar && this.navbars) {
 				var inners = this.navbars.querySelectorAll(SELECTOR_NAVBAR_INNER);
 				var inner, left, right, center, leftWidth, rightWidth, centerWidth, noLeft, onRight, currLeft, diff, navbarWidth;
 				for (var i = 0, len = inners.length; i < len; i++) {
@@ -376,7 +371,7 @@
 			}
 			var detail = event.detail;
 			if (!this.dragging) {
-				if (($.gestures.session.firstTouch.center.x - this.view.offsetLeft) < this.options.swipeBackPageActiveArea) {
+				if ((detail.start.x - this.view.offsetLeft) < this.options.swipeBackPageActiveArea) {
 					this.isBack = true;
 					this._initPageTransform();
 				}
@@ -385,10 +380,10 @@
 				var deltaX = 0;
 				if (!this.moved) { //start
 					deltaX = detail.deltaX;
-					$.gestures.session.lockDirection = true; //锁定方向
-					$.gestures.session.startDirection = detail.direction;
+					$.gestures.touch.lockDirection = true; //锁定方向
+					$.gestures.touch.startDirection = detail.direction;
 				} else { //move
-					deltaX = detail.deltaX - ($.gestures.session.prevTouch && $.gestures.session.prevTouch.deltaX || 0);
+					deltaX = detail.deltaX - detail.lastDeltaX;
 				}
 				var newX = this.x + deltaX;
 				if (newX < 0 || newX > this.maxScrollX) {
@@ -437,26 +432,24 @@
 			this.previousPageClassList.add(CLASS_TRANSITIONING);
 			this.activePageClassList.add(CLASS_TRANSITIONING);
 			var self = this;
-			if (this.previousNavbar && this.activeNavbar) {
+			if (this.options.animateNavbar && this.previousNavElements && this.activeNavElements) {
 				this.previousNavbar.classList.add(CLASS_TRANSITIONING);
 				this.activeNavbar.classList.add(CLASS_TRANSITIONING);
-				if (this._isAnimateNavbarIOS() && this.previousNavElements && this.activeNavElements) {
-					$.each(this.previousNavElements, function(i, el) {
-						el.classList.add(CLASS_TRANSITIONING);
-						self._cleanStyle(el);
-					});
-					$.each(this.activeNavElements, function(i, el) {
-						el.classList.add(CLASS_TRANSITIONING);
-						self._cleanStyle(el);
-					});
-					if (this.previousNavBackIcon) {
-						this._cleanStyle(this.previousNavBackIcon);
-						this.previousNavBackIcon.classList.add(CLASS_TRANSITIONING);
-					}
-					if (this.activeNavBackIcon) {
-						this._cleanStyle(this.activeNavBackIcon);
-						this.activeNavBackIcon.classList.add(CLASS_TRANSITIONING);
-					}
+				$.each(this.previousNavElements, function(i, el) {
+					el.classList.add(CLASS_TRANSITIONING);
+					self._cleanStyle(el);
+				});
+				$.each(this.activeNavElements, function(i, el) {
+					el.classList.add(CLASS_TRANSITIONING);
+					self._cleanStyle(el);
+				});
+				if (this.previousNavBackIcon) {
+					this._cleanStyle(this.previousNavBackIcon);
+					this.previousNavBackIcon.classList.add(CLASS_TRANSITIONING);
+				}
+				if (this.activeNavBackIcon) {
+					this._cleanStyle(this.activeNavBackIcon);
+					this.activeNavBackIcon.classList.add(CLASS_TRANSITIONING);
 				}
 			}
 		},
@@ -485,50 +478,49 @@
 		_setNavbarTranslate: function(x, y) {
 			var percentage = x / this.maxScrollX;
 			//only for ios
-			if (this._isAnimateNavbarIOS()) {
-				if (this.previousNavElements && this.activeNavElements) {
-					this.animateNavbarByIOS(percentage);
+			if ($.os.ios && this.options.animateNavbar && this.previousNavElements && this.activeNavElements) {
+				var i, len, style, el;
+				for (i = 0, len = this.activeNavElements.length; i < len; i++) {
+					el = this.activeNavElements[i];
+					style = el.style;
+					style.opacity = (1 - percentage * (el.classList.contains(CLASS_LEFT) ? 3.5 : 1.3));
+					if (!el.classList.contains(CLASS_RIGHT)) {
+						var activeNavTranslate = percentage * el.mNavbarRightOffset;
+						el.style.webkitTransform = ('translate3d(' + activeNavTranslate + 'px,0,0)');
+						if (el.classList.contains(CLASS_LEFT) && this.activeNavBackIcon) {
+							this.activeNavBackIcon.style.webkitTransform = ('translate3d(' + -activeNavTranslate + 'px,0,0)');
+						}
+					}
 				}
-			} else { //pop-in
+				for (i = 0, len = this.previousNavElements.length; i < len; i++) {
+					el = this.previousNavElements[i];
+					style = el.style;
+					style.opacity = percentage * 1.3 - 0.3;
+					if (!el.classList.contains(CLASS_RIGHT)) {
+						var previousNavTranslate = el.mNavbarLeftOffset * (1 - percentage);
+						el.style.webkitTransform = ('translate3d(' + previousNavTranslate + 'px,0,0)');
+						if (el.classList.contains(CLASS_LEFT) && this.previousNavBackIcon) {
+							this.previousNavBackIcon.style.webkitTransform = ('translate3d(' + -previousNavTranslate + 'px,0,0)');
+						}
+					}
+				}
+			} else {
 				this.activeNavbar.style.opacity = 1 - percentage * 1.3;
 				this.previousNavbar.style.opacity = percentage * 1.3 - 0.3;
-			}
-		},
-		animateNavbarByIOS: function(percentage) {
-			var i, len, style, el;
-			for (i = 0, len = this.activeNavElements.length; i < len; i++) {
-				el = this.activeNavElements[i];
-				style = el.style;
-				style.opacity = (1 - percentage * (el.classList.contains(CLASS_LEFT) ? 3.5 : 1.3));
-				if (!el.classList.contains(CLASS_RIGHT)) {
-					var activeNavTranslate = percentage * el.mNavbarRightOffset;
-					el.style.webkitTransform = ('translate3d(' + activeNavTranslate + 'px,0,0)');
-					if (el.classList.contains(CLASS_LEFT) && this.activeNavBackIcon) {
-						this.activeNavBackIcon.style.webkitTransform = ('translate3d(' + -activeNavTranslate + 'px,0,0)');
-					}
-				}
-			}
-			for (i = 0, len = this.previousNavElements.length; i < len; i++) {
-				el = this.previousNavElements[i];
-				style = el.style;
-				style.opacity = percentage * 1.3 - 0.3;
-				if (!el.classList.contains(CLASS_RIGHT)) {
-					var previousNavTranslate = el.mNavbarLeftOffset * (1 - percentage);
-					el.style.webkitTransform = ('translate3d(' + previousNavTranslate + 'px,0,0)');
-					if (el.classList.contains(CLASS_LEFT) && this.previousNavBackIcon) {
-						this.previousNavBackIcon.style.webkitTransform = ('translate3d(' + -previousNavTranslate + 'px,0,0)');
-					}
-				}
 			}
 		},
 		setTranslate: function(x, y) {
 			this.x = x;
 			this.y = y;
 			this.previousPage.style.opacity = 0.9 + 0.1 * x / this.maxScrollX;
-			this.previousPage.style['webkitTransform'] = this._getTranslateStr((x / 6 - this.maxScrollX / 6), y);
+			if ($.os.ios) { //only for ios
+				this.previousPage.style['webkitTransform'] = this._getTranslateStr((x / 5 - this.maxScrollX / 5), y);
+			}
 			this.activePage.style['webkitTransform'] = this._getTranslateStr(x, y);
 
-			this.navbars && this._setNavbarTranslate(x, y);
+			if (this.options.animateNavbar) {
+				this._setNavbarTranslate(x, y);
+			}
 			this.lastX = this.x;
 			this.lastY = this.y;
 		},
@@ -557,22 +549,20 @@
 			var nextPage = document.querySelector(pageSelector);
 
 			if (nextPage) {
+				var nextNavbar = nextPage.querySelector(SELECTOR_NAVBAR_INNER);
+
+				var previousNavbar = this.navbars.querySelector(SELECTOR_NAVBAR_LEFT);
+				var activeNavbar = this.navbars.querySelector(SELECTOR_NAVBAR_CENTER);
 				var previousPage = this.pages.querySelector(SELECTOR_PAGE_LEFT);
 				var activePage = this.pages.querySelector(SELECTOR_PAGE_CENTER);
-				var previousNavbar;
-				var activeNavbar;
-				if (this.navbars) {
-					previousNavbar = this.navbars.querySelector(SELECTOR_NAVBAR_LEFT);
-					activeNavbar = this.navbars.querySelector(SELECTOR_NAVBAR_CENTER);
+
+				if (previousNavbar && previousPage) {
+					this._removePage(previousPage, previousNavbar);
+					this.history.push(previousPage); //add to history
 				}
 				if (activeNavbar) {
 					activeNavbar.classList.remove(CLASS_NAVBAR_CENTER);
 					activeNavbar.classList.add(CLASS_NAVBAR_LEFT);
-				}
-
-				if (previousPage) {
-					this._removePage(previousPage, previousNavbar);
-					this.history.push(previousPage); //add to history
 				}
 
 				if (activePage) {
@@ -580,7 +570,6 @@
 					activePage.style.webkitTransform = 'translate3d(0,0,0)';
 					activePage.classList.add(CLASS_PAGE_LEFT);
 				}
-
 
 				nextPage.style.webkitTransform = 'translate3d(100%,0,0)';
 				this._appendPage(nextPage);
@@ -590,18 +579,14 @@
 				this.ratio = 1;
 
 				this._initPageTransform();
+				this._initNavBar();
 
-				this.navbars && this._initNavBar();
-
-				this.navbars && this._setNavbarTranslate(this.maxScrollX, 0);
+				this._setNavbarTranslate(this.maxScrollX, 0);
 				//force
 				this.previousPage.offsetHeight;
 				this.activePage.offsetHeight;
-
-				if (this.navbars) {
-					this.previousNavbar.offsetHeight;
-					this.activeNavbar.offsetHeight;
-				}
+				this.previousNavbar.offsetHeight;
+				this.activeNavbar.offsetHeight;
 
 				this._trigger('pageBeforeShow', this.activePage);
 				this._prepareTransition();
@@ -619,10 +604,10 @@
 		if (!id) {
 			id = ++$.uuid;
 			$.data[id] = viewApi = new View(self, options);
-			self.setAttribute('data-view', id);
 		} else {
 			viewApi = $.data[id];
 		}
 		return viewApi;
+
 	}
 })(mui, window);
