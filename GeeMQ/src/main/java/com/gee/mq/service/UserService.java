@@ -13,8 +13,8 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> {
-    public void login(User user) {
+public class UserService extends ServiceImpl<UserMapper, User> {
+    public User login(User user) {
         User one = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getUsername, user.getUsername()));
         if (one == null) {
@@ -24,6 +24,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> {
         if (!one.getPassword().equals(MD5.create().digestHex(user.getPassword() + one.getSalt()))) {
             throw new GeeException("密码错误");
         }
+
+        one.setPassword(null);
+        one.setSalt(null);
+        return one;
     }
 
     public void register(User user) {

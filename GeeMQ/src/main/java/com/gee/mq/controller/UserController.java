@@ -2,7 +2,7 @@ package com.gee.mq.controller;
 
 import com.gee.mq.bean.Result;
 import com.gee.mq.bean.User;
-import com.gee.mq.service.UserServiceImpl;
+import com.gee.mq.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user/calc")
 public class UserController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
 
     /**
@@ -25,8 +25,8 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
-        userService.login(user);
-        return Result.ok();
+        User login = userService.login(user);
+        return Result.ok(login);
     }
 
     /**
