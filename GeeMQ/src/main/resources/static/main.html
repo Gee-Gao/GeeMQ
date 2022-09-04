@@ -3,7 +3,8 @@
 
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
 		<title></title>
 		<link href="css/mui.min.css" rel="stylesheet" />
 
@@ -12,6 +13,7 @@
 				font-size: 14px;
 				color: #8f8f94;
 			}
+
 			.mui-btn {
 				padding: 10px;
 			}
@@ -25,28 +27,74 @@
 		</header>
 		<div class="mui-content">
 			<div class="mui-content-padded">
+				<button id='addRecord' class="mui-btn mui-btn-block mui-btn-green">新增记录</button>
+				<ul id="list" class="mui-table-view">
 
-
-				<button id='exit' class="mui-btn mui-btn-block mui-btn-green">关闭</button>
+				</ul>
 			</div>
 		</div>
 		<script src="js/mui.min.js"></script>
 		<script src="js/app.js"></script>
+		<script src="js/config.js"></script>
 		<script>
 			(function($, doc) {
 				$.init();
-				var settings = app.getSettings();
-				var account = doc.getElementById('account');
-				//
-				window.addEventListener('show', function() {
-					var state = app.getState();
-					account.innerText = state.account;
-				}, false);
+
+
 				$.plusReady(function() {
 					var settingPage = $.preload({
 						"id": 'setting',
 						"url": 'setting.html'
 					});
+
+					var userinfoJson = localStorage.getItem("userInfo");
+
+					var userinfo = JSON.parse(userinfoJson);
+					mui.ajax(serverAddr + "/aunt/calc/list", {
+						data: {
+							"userId": userinfo.id
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							var html = '';
+							if (data.code == 200) {
+								var list = data.data;
+								for (let i = 0; i < list.length; i++) {
+									html += '<li class="mui-table-view-cell">' + list[i].auntDate +
+										'</li>';
+								}
+								document.getElementById("list").innerHTML = html;
+							}
+
+
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							if (type == "timeout") {
+								plus.nativeUI.toast("请求超时");
+							} else {
+								plus.nativeUI.toast("请求失败");
+							}
+						}
+					});
+					doc.getElementById('addRecord').addEventListener("tap", function() {
+						var auntAdd = plus.webview.getWebviewById('auntAdd');
+						if (auntAdd) {
+							auntAdd.reload();
+						}
+
+						$.openWindow({
+							url: 'auntAdd.html',
+							id: 'auntAdd',
+						});
+					});
+
+
 					//设置
 					var settingButton = doc.getElementById('setting');
 					//settingButton.style.display = settings.autoLogin ? 'block' : 'none';
