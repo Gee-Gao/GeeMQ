@@ -47,8 +47,8 @@
 						"url": 'setting.html'
 					});
 
-					var userinfoJson = localStorage.getItem("userInfo");
 
+					var userinfoJson = localStorage.getItem("userInfo");
 					var userinfo = JSON.parse(userinfoJson);
 					mui.ajax(serverAddr + "/aunt/calc/list", {
 						data: {
@@ -69,6 +69,7 @@
 										'</li>';
 								}
 								document.getElementById("list").innerHTML = html;
+
 							}
 
 
@@ -82,6 +83,7 @@
 							}
 						}
 					});
+
 					doc.getElementById('addRecord').addEventListener("tap", function() {
 						var auntAdd = plus.webview.getWebviewById('auntAdd');
 						if (auntAdd) {
@@ -94,11 +96,18 @@
 						});
 					});
 
-
+					window.onload = function() {
+						window.addEventListener('refresh', function() {
+							init();
+						})
+					}
 					// 分析
 					var analyzerButton = doc.getElementById('analyzer');
 					analyzerButton.addEventListener('tap', function(event) {
-						plus.webview.getWebviewById('analyzer').reload();
+						var analyzer = plus.webview.getWebviewById('analyzer')
+						if(analyzer){
+							analyzer.reload();
+						}
 						$.openWindow({
 							url: 'analyzer.html',
 							id: 'analyzer',
