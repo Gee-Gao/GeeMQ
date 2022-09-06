@@ -77,18 +77,10 @@
 				$.plusReady(function() {
 
 					doc.getElementById("backToMain").addEventListener("tap", function() {
-						var webView = plus.webview.getWebviewById('main').reload();
-						setTimeout(function(){
-							$.openWindow({
-								url: 'main.html',
-								id: 'main',
-								show: {
-									aniShow: 'pop-in'
-								}
-							},500);
-						})
-						
-						return true;
+						$.openWindow({
+							url: 'main.html',
+							id: 'main'+ new Date().getTime(),
+						});
 					})
 
 

@@ -3,6 +3,7 @@ package com.gee.mq.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gee.mq.bean.Aunt;
+import com.gee.mq.bean.PercentData;
 import com.gee.mq.bean.User;
 import com.gee.mq.config.GeeException;
 import com.gee.mq.mapper.AuntMapper;
@@ -67,24 +68,17 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     public Map<String, Object> auntRecord(List<LocalDate> list) {
         LocalDate first = list.get(0);
         LocalDate second = list.get(1);
-        TreeMap<Long, Long> countWithDays = new TreeMap<>();
+
         Map<String, Object> result = new HashMap<>();
         long min = first.until(second, ChronoUnit.DAYS);
         long max = min;
-        long sum = 0L;
-        countWithDays.put(min, 1L);
+        long sum = max;
+
         if (list.size() >= 2) {
             for (int i = 1; i < list.size() - 1; i++) {
                 LocalDate before = list.get(i);
                 LocalDate after = list.get(i + 1);
                 long until = before.until(after, ChronoUnit.DAYS);
-                Long value = countWithDays.get(until);
-                if (value == null) {
-                    countWithDays.put(until, 1L);
-                } else {
-                    countWithDays.put(until, value + 1);
-                }
-
                 if (until < min) {
                     min = until;
                 }
@@ -94,8 +88,9 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 }
                 sum += until;
             }
-
+            TreeMap<Long, Long> countWithDays = getCountWithDays(list);
             AtomicLong maxCount = new AtomicLong(0L);
+            Map<Long, BigDecimal> percentData = new HashMap<>();
             StringBuilder daysMax = new StringBuilder();
             List<String> dayCount = new ArrayList<>();
             countWithDays.forEach((day, count) -> {
@@ -123,10 +118,46 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
             result.put("daysMax", daysMax);
             result.put("dayCount", dayCount);
             result.put("nextDays", "预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
+            result.put("percentData", percentData);
         } else {
 
             result.put("message", "此功能需保存两次及以上记录");
         }
         return result;
+    }
+
+    public List<PercentData> echarts(List<LocalDate> list) {
+        List<PercentData> result = new ArrayList<>();
+        TreeMap<Long, Long> countWithDays = getCountWithDays(list);
+        BigDecimal hundred = new BigDecimal(100);
+        countWithDays.forEach((day, count) -> {
+            BigDecimal percent = new BigDecimal(count).divide(new BigDecimal(countWithDays.size()), 4, RoundingMode.HALF_UP).multiply(hundred);
+            PercentData percentData = new PercentData(day + "天", percent);
+            result.add(percentData);
+        });
+        BigDecimal lastPercent = new BigDecimal(100);
+        for (int i = 0; i < result.size() - 1; i++) {
+            BigDecimal percent = result.get(i).getValue();
+            lastPercent = lastPercent.subtract(percent);
+        }
+        PercentData percentData = result.get(result.size() - 1);
+        percentData.setValue(lastPercent);
+        return result;
+    }
+
+    public TreeMap<Long, Long> getCountWithDays(List<LocalDate> list) {
+        TreeMap<Long, Long> countWithDays = new TreeMap<>();
+        for (int i = 0; i < list.size() - 1; i++) {
+            LocalDate before = list.get(i);
+            LocalDate after = list.get(i + 1);
+            long until = before.until(after, ChronoUnit.DAYS);
+            Long value = countWithDays.get(until);
+            if (value == null) {
+                countWithDays.put(until, 1L);
+            } else {
+                countWithDays.put(until, value + 1);
+            }
+        }
+        return countWithDays;
     }
 }

@@ -44,4 +44,10 @@ public class AuntController {
         List<LocalDate> list = auntService.getAuntLocalDate(user);
         return Result.ok(auntService.auntRecord(list));
     }
+
+    @PostMapping("/echarts")
+    public Result echarts(@RequestBody User user) {
+        List<LocalDate> list = auntService.getAuntLocalDate(user);
+        return Result.ok(auntService.echarts(list));
+    }
 }
