@@ -1,8 +1,8 @@
-package com.gee.mq.controller;
+package com.gee.controller;
 
-import com.gee.mq.bean.Result;
-import com.gee.mq.bean.User;
-import com.gee.mq.service.UserService;
+import com.gee.bean.Result;
+import com.gee.bean.User;
+import com.gee.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

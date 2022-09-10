@@ -1,10 +1,10 @@
-package com.gee.mq.controller;
+package com.gee.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.gee.mq.bean.Aunt;
-import com.gee.mq.bean.Result;
-import com.gee.mq.bean.User;
-import com.gee.mq.service.AuntService;
+import com.gee.bean.Aunt;
+import com.gee.bean.Result;
+import com.gee.bean.User;
+import com.gee.service.AuntService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

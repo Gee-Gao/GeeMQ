@@ -1,11 +1,11 @@
-package com.gee.mq.service;
+package com.gee.service;
 
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.gee.mq.bean.User;
-import com.gee.mq.config.GeeException;
-import com.gee.mq.mapper.UserMapper;
+import com.gee.bean.User;
+import com.gee.config.GeeException;
+import com.gee.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

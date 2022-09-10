@@ -1,4 +1,4 @@
-package com.gee.mq.bean;
+package com.gee.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.gee.mq.config;
+package com.gee.config;
 
 import lombok.Data;
 

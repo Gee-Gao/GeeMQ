@@ -1,4 +1,4 @@
-package com.gee.mq.bean;
+package com.gee.bean;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;

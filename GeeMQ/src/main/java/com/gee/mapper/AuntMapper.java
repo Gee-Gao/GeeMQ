@@ -1,7 +1,7 @@
-package com.gee.mq.mapper;
+package com.gee.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.gee.mq.bean.Aunt;
+import com.gee.bean.Aunt;
 
 public interface AuntMapper extends BaseMapper<Aunt> {
 }

@@ -1,12 +1,12 @@
-package com.gee.mq.service;
+package com.gee.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.gee.mq.bean.Aunt;
-import com.gee.mq.bean.EchartsData;
-import com.gee.mq.bean.User;
-import com.gee.mq.config.GeeException;
-import com.gee.mq.mapper.AuntMapper;
+import com.gee.bean.Aunt;
+import com.gee.bean.EchartsData;
+import com.gee.bean.User;
+import com.gee.config.GeeException;
+import com.gee.mapper.AuntMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
