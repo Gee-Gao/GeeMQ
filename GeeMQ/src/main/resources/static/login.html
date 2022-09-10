@@ -205,14 +205,44 @@
 								var auth = auths[this.authId];
 								var waiting = plus.nativeUI.showWaiting();
 								auth.login(function() {
-									waiting.close();
+									
 									plus.nativeUI.toast("登录认证成功");
 									auth.getUserInfo(function() {
-										plus.nativeUI.toast("获取用户信息成功");
-										var name = auth.userInfo.nickname || auth
-											.userInfo.name;
-										app.createState(name, function() {
-											toMain();
+										var name = auth.userInfo.nickname || auth.userInfo.name;
+										var user ={
+											"name":name,
+											"openId":auth.userInfo.openid
+										}
+										mui.ajax(serverAddr + "/user/calc/wxLogin", {
+											data: user,
+											dataType: 'json', //服务器返回json格式数据
+											type: 'post', //HTTP请求类型
+											timeout: 10000, //超时时间设置为10秒；
+											headers: {
+												'Content-Type': 'application/json'
+											},
+											success: function(data) {
+												waiting.close();
+												if (data.code == 200) {
+													console.log(JSON.stringify(data.data))
+													plus.nativeUI.toast("登录成功");
+													localStorage.setItem("userInfo", JSON.stringify(
+														data.data))
+													toMain();
+												} else {
+													plus.nativeUI.toast(data.msg);
+												}
+										
+											},
+											error: function(xhr, type, errorThrown) {
+												waiting.close();
+												//异常处理；
+												if (type == "timeout") {
+													plus.nativeUI.toast("请求超时");
+												} else {
+													plus.nativeUI.toast("请求失败");
+												}
+											}
 										});
 									}, function(e) {
 										plus.nativeUI.toast("获取用户信息失败：" + e.message);
@@ -279,9 +309,7 @@
 							});
 						});
 					});
-					$.enterfocus('#login-form input', function() {
-						$.trigger(loginButton, 'tap');
-					});
+
 					autoLoginButton.classList[settings.autoLogin ? 'add' : 'remove']('mui-active')
 					autoLoginButton.addEventListener('toggle', function(event) {
 						setTimeout(function() {
