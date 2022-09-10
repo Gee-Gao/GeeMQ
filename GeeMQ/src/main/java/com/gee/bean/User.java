@@ -44,6 +44,11 @@ public class User {
     private String salt;
 
     /**
+     * 微信openId
+     */
+    private String openId;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

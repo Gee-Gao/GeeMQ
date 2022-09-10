@@ -43,4 +43,10 @@ public class UserController {
         return Result.ok();
     }
 
+    @PostMapping("wxLogin")
+    private Result wxLogin(@RequestBody User user) {
+        User login = userService.wxLogin(user);
+        return Result.ok(login);
+    }
+
 }

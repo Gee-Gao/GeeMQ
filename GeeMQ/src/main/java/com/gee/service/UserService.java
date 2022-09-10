@@ -64,4 +64,18 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
         return stringBuilder.toString();
     }
+
+    public User wxLogin(User user) {
+        User one = getOne(new LambdaQueryWrapper<User>()
+                .eq(User::getOpenId, user.getOpenId()));
+
+        if (one == null) {
+            save(user);
+            return user;
+        } else {
+            return one;
+        }
+
+
+    }
 }
