@@ -85,6 +85,10 @@
 			.oauth-area .oauth-btn.disabled {
 				background-color: #ddd;
 			}
+			
+			* {
+				touch-action: pan-y;
+			}
 		</style>
 
 	</head>
@@ -152,15 +156,10 @@
 						main_loaded_flag = true;
 					});
 					var toMain = function() {
-						//使用定时器的原因：
-						//可能执行太快，main页面loaded事件尚未触发就执行自定义事件，此时必然会失败
-						var id = setInterval(function() {
-							if (main_loaded_flag) {
-								clearInterval(id);
-								$.fire(mainPage, 'show', null);
-								mainPage.show("pop-in");
-							}
-						}, 20);
+						$.openWindow({
+							url: 'main.html',
+							id: 'main'+new Date().getTime(),
+						});
 					};
 					//检查 "登录状态/锁屏状态" 开始
 					if (settings.autoLogin && state.token && settings.gestures) {
@@ -205,8 +204,6 @@
 								var auth = auths[this.authId];
 								var waiting = plus.nativeUI.showWaiting();
 								auth.login(function() {
-									
-									plus.nativeUI.toast("登录认证成功");
 									auth.getUserInfo(function() {
 										var name = auth.userInfo.nickname || auth.userInfo.name;
 										var user ={

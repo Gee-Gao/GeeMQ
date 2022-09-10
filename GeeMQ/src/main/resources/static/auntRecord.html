@@ -21,6 +21,10 @@
 			.mui-btn {
 				padding: 10px;
 			}
+			
+			* {
+				touch-action: pan-y;
+			}
 		</style>
 	</head>
 
@@ -62,22 +66,28 @@
 						},
 						success: function(data) {
 							var calcData = data.data;
-							console.log(JSON.stringify(calcData))
+
 							var html ='<ul class="mui-table-view">'
-							for(var i =0;i<calcData.dayCount.length;i++){
-								html +=	'<li class="mui-table-view-cell">' + calcData.dayCount[i] + '</li>'
-							}
-							 html+='</ul><br>'
-								+'<ul class="mui-table-view">'
-									+'<li class="mui-table-view-cell">' + calcData.min +'</li>'
-									+'<li class="mui-table-view-cell">' + calcData.max +'</li>'
-									+'<li class="mui-table-view-cell">' + calcData.avg +'</li>'
-									+'<li class="mui-table-view-cell">' + calcData.daysMax +'</li>'
-									+'<li class="mui-table-view-cell">' + calcData.nextDays +'</li>'
-								+'</ul><br>'
+							if(calcData.message){
+								html +='<li class="mui-table-view-cell">' + calcData.message +'</li>'
+							}else{
+								var html ='<ul class="mui-table-view">'
+								for(var i =0;i<calcData.dayCount.length;i++){
+									html +=	'<li class="mui-table-view-cell">' + calcData.dayCount[i] + '</li>'
+								}
+								 html+='</ul><br>'
+									+'<ul class="mui-table-view">'
+										+'<li class="mui-table-view-cell">' + calcData.min +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.max +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.avg +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.daysMax +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.nextDays +'</li>'
+									
+									
 								
+							}
+							html += '</ul>'
 							doc.getElementById("content").innerHTML = html;
-							localStorage.setItem("percentData",JSON.stringify(calcData.percentData))
 						},
 						error: function(xhr, type, errorThrown) {
 							//异常处理；

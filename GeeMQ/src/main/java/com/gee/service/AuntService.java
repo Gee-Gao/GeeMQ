@@ -27,7 +27,9 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
             throw new GeeException("未选择姨妈日期");
         }
 
-        Aunt one = getOne(new LambdaQueryWrapper<Aunt>().eq(Aunt::getAuntDate, aunt.getAuntDate()));
+        Aunt one = getOne(new LambdaQueryWrapper<Aunt>()
+                .eq(Aunt::getAuntDate, aunt.getAuntDate())
+                .eq(Aunt::getUserId, aunt.getUserId()));
 
         if (one != null) {
             throw new GeeException("此记录已存在");
@@ -66,67 +68,72 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     }
 
     public Map<String, Object> auntRecord(List<LocalDate> list) {
+        Map<String, Object> result = new HashMap<>();
+        if (list.size() < 2) {
+            result.put("message", "此功能需保存两次及以上记录");
+            return result;
+        }
+
         LocalDate first = list.get(0);
         LocalDate second = list.get(1);
 
-        Map<String, Object> result = new HashMap<>();
         long min = first.until(second, ChronoUnit.DAYS);
         long max = min;
         long sum = max;
 
-        if (list.size() >= 2) {
-            for (int i = 1; i < list.size() - 1; i++) {
-                long until = getDaySubtract(list, i);
-                if (until < min) {
-                    min = until;
-                }
 
-                if (until > max) {
-                    max = until;
-                }
-                sum += until;
+        for (int i = 1; i < list.size() - 1; i++) {
+            long until = getDaySubtract(list, i);
+            if (until < min) {
+                min = until;
             }
-            TreeMap<Long, Long> countWithDays = getCountWithDays(list);
-            AtomicLong maxCount = new AtomicLong(0L);
-            Map<Long, BigDecimal> percentData = new HashMap<>();
-            StringBuilder daysMax = new StringBuilder();
-            List<String> dayCount = new ArrayList<>();
-            countWithDays.forEach((day, count) -> {
-                if (count > maxCount.get()) {
-                    maxCount.set(count);
-                }
-                dayCount.add(day + "天出现" + count + "次");
-            });
 
-            countWithDays.forEach((day, count) -> {
-                if (count.equals(maxCount.get())) {
-                    daysMax.append(day).append("天,");
-                }
-            });
-
-            daysMax.replace(daysMax.length() - 1, daysMax.length(), "")
-                    .append("出现次数最多，次数为").append(maxCount).append("次");
-
-            BigDecimal avg = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
-            LocalDate nextDay = list.get(list.size() - 1).plusDays(
-                    new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP).longValue());
-            result.put("min", "最小间隔: " + min + "天");
-            result.put("max", "最大间隔: " + max + "天");
-            result.put("avg", "平均间隔: " + avg + "天");
-            result.put("daysMax", daysMax);
-            result.put("dayCount", dayCount);
-            result.put("nextDays", "预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
-            result.put("percentData", percentData);
-        } else {
-
-            result.put("message", "此功能需保存两次及以上记录");
+            if (until > max) {
+                max = until;
+            }
+            sum += until;
         }
+        TreeMap<Long, Long> countWithDays = getCountWithDays(list);
+        AtomicLong maxCount = new AtomicLong(0L);
+        Map<Long, BigDecimal> percentData = new HashMap<>();
+        StringBuilder daysMax = new StringBuilder();
+        List<String> dayCount = new ArrayList<>();
+        countWithDays.forEach((day, count) -> {
+            if (count > maxCount.get()) {
+                maxCount.set(count);
+            }
+            dayCount.add(day + "天出现" + count + "次");
+        });
+
+        countWithDays.forEach((day, count) -> {
+            if (count.equals(maxCount.get())) {
+                daysMax.append(day).append("天,");
+            }
+        });
+
+        daysMax.replace(daysMax.length() - 1, daysMax.length(), "")
+                .append("出现次数最多，次数为").append(maxCount).append("次");
+
+        BigDecimal avg = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
+        LocalDate nextDay = list.get(list.size() - 1).plusDays(
+                new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP).longValue());
+        result.put("min", "最小间隔: " + min + "天");
+        result.put("max", "最大间隔: " + max + "天");
+        result.put("avg", "平均间隔: " + avg + "天");
+        result.put("daysMax", daysMax);
+        result.put("dayCount", dayCount);
+        result.put("nextDays", "预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
+        result.put("percentData", percentData);
         return result;
     }
 
+
     public Map<String, Object> echarts(List<LocalDate> list) {
         HashMap<String, Object> result = new HashMap<>();
-
+        if(list.size()<2){
+            result.put("message", "此功能需保存两次及以上记录");
+            return result;
+        }
         // 天数占比
         List<EchartsData> daysPercentList = new ArrayList<>();
         TreeMap<Long, Long> countWithDays = getCountWithDays(list);

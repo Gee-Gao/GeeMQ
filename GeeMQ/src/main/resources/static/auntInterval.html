@@ -21,6 +21,10 @@
 			.mui-btn {
 				padding: 10px;
 			}
+			
+			* {
+				touch-action: pan-y;
+			}
 		</style>
 	</head>
 
@@ -62,7 +66,6 @@
 						},
 						success: function(data) {
 							var calcData = data.data;
-							console.log(JSON.stringify(calcData))
 							var html ='<ul class="mui-table-view">'
 							
 							for(var i =0;i<calcData.length;i++){
@@ -88,12 +91,7 @@
 						});
 					})
 					
-					doc.getElementById("echarts").addEventListener("tap", function() {
-						$.openWindow({
-							url: 'echarts.html',
-							id: 'echarts'+new Date().getTime(),
-						});
-					})
+		
 
 					$.oldBack = mui.back;
 					var backButtonPress = 0;

@@ -12,6 +12,15 @@
 		<!--App自定义的css-->
 		<!-- <link rel="stylesheet" type="text/css" href="../css/app.css" /> -->
 		<style>
+			li {
+				text-align: right;
+			}
+
+			ul {
+				font-size: 16px;
+				color: #8f8f94;
+			}
+
 			.chart {
 				height: 200px;
 				margin: 0px;
@@ -26,6 +35,10 @@
 			h5:first-child {
 				margin-top: 15px;
 			}
+
+			* {
+				touch-action: pan-y;
+			}
 		</style>
 		<script src="js/mui.min.js"></script>
 	</head>
@@ -36,7 +49,7 @@
 			<h1 class="mui-title">图表分析</h1>
 		</header>
 		<div class="mui-content">
-			<div class="mui-content-padded">
+			<div id="echartsContent" class="mui-content-padded">
 				<h5>天数占比</h5>
 				<div class="chart" id="percentData"></div>
 				<h5>天数趋势</h5>
@@ -74,101 +87,109 @@
 						},
 						success: function(data) {
 							var calcData = data.data;
-							console.log(JSON.stringify(data.data.daysTrendList));
-							var XDaysTrend = [];
-							var yDaysTrend = [];
-							var daysTrend = data.data.daysTrendList;
-							for (var j = 0; j < daysTrend.length; j++) {
-								XDaysTrend.push(daysTrend[j].name);
-								yDaysTrend.push(daysTrend[j].value)
-							}
+							if (calcData.message) {
+								var echartsContent = document.getElementById('echartsContent');
+								var html =
+									'<ul class="mui-table-view"><li class="mui-table-view-cell">' +
+									calcData.message + '</li>'
+								echartsContent.innerHTML = html;
+							} else {
+								var XDaysTrend = [];
+								var yDaysTrend = [];
+								var daysTrend = data.data.daysTrendList;
+								for (var j = 0; j < daysTrend.length; j++) {
+									XDaysTrend.push(daysTrend[j].name);
+									yDaysTrend.push(daysTrend[j].value)
+								}
 
-							var percentData = document.getElementById('percentData');
-							var lineChart = document.getElementById('lineChart');
+								var percentData = document.getElementById('percentData');
+								var lineChart = document.getElementById('lineChart');
 
-							var pieChart = echarts.init(percentData);
-							var lineChart = echarts.init(lineChart);
-							option = {
-								series: [{
-									name: '类型',
-									type: 'pie',
-									radius: '55%',
-									center: ['50%', '60%'],
-									data: calcData.daysPercentList,
-									itemStyle: {
-										emphasis: {
-											shadowBlur: 10,
-											shadowOffsetX: 0,
-											shadowColor: 'rgba(0, 0, 0, 0.5)'
-										},
-										normal: {
-											label: {
-												show: true,
-												formatter: '{b} ({d}%)' //带当前图例名 + 百分比
-												// formatter: '{d}%' //只要百分比
+								var pieChart = echarts.init(percentData);
+								var lineChart = echarts.init(lineChart);
+								option = {
+									series: [{
+										name: '类型',
+										type: 'pie',
+										radius: '55%',
+										center: ['50%', '60%'],
+										data: calcData.daysPercentList,
+										itemStyle: {
+											emphasis: {
+												shadowBlur: 10,
+												shadowOffsetX: 0,
+												shadowColor: 'rgba(0, 0, 0, 0.5)'
 											},
-											labelLine: {
-												show: true
-											}
-										}
-									}
-								}]
-							}
-
-
-							var daysTrendOption = {
-								grid: {
-									x: 35,
-									x2: 10,
-									y: 20,
-									y2: 60
-								},
-								calculable: true,
-								xAxis: [{
-									axisLabel: {
-										show: true,
-										textStyle: {
-											color: "#65D5FF" //X轴文字颜色
-										},
-										interval: daysTrend.length>6?1:0,
-										formatter: function(value) {
-											var rowMAx = 5; // 控制一行多少字
-											var overValue = ''
-											for (let i = 0; i < value.length; i++) {
-												if ((i % rowMAx == 0) && (i != 0)) {
-													overValue += '\n'
-													overValue += value[i]
-												} else {
-													overValue += value[i]
+											normal: {
+												label: {
+													show: true,
+													formatter: '{b} ({d}%)' //带当前图例名 + 百分比
+													// formatter: '{d}%' //只要百分比
+												},
+												labelLine: {
+													show: true
 												}
 											}
-											return overValue
 										}
+									}]
+								}
+
+
+								var daysTrendOption = {
+									grid: {
+										x: 35,
+										x2: 10,
+										y: 20,
+										y2: 60
 									},
-									type: 'category',
-									data: XDaysTrend
-								}],
-								yAxis: [{
-									type: 'value',
-									splitArea: {
-										show: true
-									}
-								}],
-								series: [{
-									itemStyle: {
-										normal: {
-											label: {
-												show: true
+									calculable: true,
+									xAxis: [{
+										axisLabel: {
+											show: true,
+											textStyle: {
+												color: "#65D5FF" //X轴文字颜色
+											},
+											interval: daysTrend.length > 6 ? 1 : 0,
+											formatter: function(value) {
+												var rowMAx = 5; // 控制一行多少字
+												var overValue = ''
+												for (let i = 0; i < value.length; i++) {
+													if ((i % rowMAx == 0) && (i != 0)) {
+														overValue += '\n'
+														overValue += value[i]
+													} else {
+														overValue += value[i]
+													}
+												}
+												return overValue
 											}
+										},
+										type: 'category',
+										data: XDaysTrend
+									}],
+									yAxis: [{
+										type: 'value',
+										splitArea: {
+											show: true
 										}
-									},
-									type: "line",
-									data: yDaysTrend
-								}]
+									}],
+									series: [{
+										itemStyle: {
+											normal: {
+												label: {
+													show: true
+												}
+											}
+										},
+										type: "line",
+										data: yDaysTrend
+									}]
+								}
+
+								pieChart.setOption(option);
+								lineChart.setOption(daysTrendOption)
 							}
 
-							pieChart.setOption(option);
-							lineChart.setOption(daysTrendOption)
 
 						},
 						error: function(xhr, type, errorThrown) {
