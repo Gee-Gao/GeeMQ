@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PercentData {
+public class EchartsData {
     private String name;
     private BigDecimal value;
 }

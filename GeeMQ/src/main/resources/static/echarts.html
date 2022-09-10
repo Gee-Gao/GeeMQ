@@ -33,12 +33,14 @@
 	<body>
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<h1 class="mui-title">chart（EChart图表）</h1>
+			<h1 class="mui-title">图表分析</h1>
 		</header>
 		<div class="mui-content">
 			<div class="mui-content-padded">
 				<h5>天数占比</h5>
 				<div class="chart" id="percentData"></div>
+				<h5>天数趋势</h5>
+				<div class="chart" style="" id="lineChart"></div>
 			</div>
 		</div>
 		<script src="js/mui.min.js"></script>
@@ -72,17 +74,27 @@
 						},
 						success: function(data) {
 							var calcData = data.data;
+							console.log(JSON.stringify(data.data.daysTrendList));
+							var XDaysTrend = [];
+							var yDaysTrend = [];
+							var daysTrend = data.data.daysTrendList;
+							for (var j = 0; j < daysTrend.length; j++) {
+								XDaysTrend.push(daysTrend[j].name);
+								yDaysTrend.push(daysTrend[j].value)
+							}
 
 							var percentData = document.getElementById('percentData');
+							var lineChart = document.getElementById('lineChart');
 
 							var pieChart = echarts.init(percentData);
+							var lineChart = echarts.init(lineChart);
 							option = {
 								series: [{
 									name: '类型',
-							 	type: 'pie',
-							 	radius: '55%',
+									type: 'pie',
+									radius: '55%',
 									center: ['50%', '60%'],
-									data: calcData,
+									data: calcData.daysPercentList,
 									itemStyle: {
 										emphasis: {
 											shadowBlur: 10,
@@ -102,7 +114,62 @@
 									}
 								}]
 							}
+
+
+							var daysTrendOption = {
+								grid: {
+									x: 35,
+									x2: 10,
+									y: 20,
+									y2: 60
+								},
+								calculable: true,
+								xAxis: [{
+									axisLabel: {
+										show: true,
+										textStyle: {
+											color: "#65D5FF" //X轴文字颜色
+										},
+										interval: daysTrend.length>6?1:0,
+										formatter: function(value) {
+											var rowMAx = 5; // 控制一行多少字
+											var overValue = ''
+											for (let i = 0; i < value.length; i++) {
+												if ((i % rowMAx == 0) && (i != 0)) {
+													overValue += '\n'
+													overValue += value[i]
+												} else {
+													overValue += value[i]
+												}
+											}
+											return overValue
+										}
+									},
+									type: 'category',
+									data: XDaysTrend
+								}],
+								yAxis: [{
+									type: 'value',
+									splitArea: {
+										show: true
+									}
+								}],
+								series: [{
+									itemStyle: {
+										normal: {
+											label: {
+												show: true
+											}
+										}
+									},
+									type: "line",
+									data: yDaysTrend
+								}]
+							}
+
 							pieChart.setOption(option);
+							lineChart.setOption(daysTrendOption)
+
 						},
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
