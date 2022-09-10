@@ -85,7 +85,7 @@
 			.oauth-area .oauth-btn.disabled {
 				background-color: #ddd;
 			}
-			
+
 			* {
 				touch-action: pan-y;
 			}
@@ -158,7 +158,7 @@
 					var toMain = function() {
 						$.openWindow({
 							url: 'main.html',
-							id: 'main'+new Date().getTime(),
+							id: 'main' + new Date().getTime(),
 						});
 					};
 					//检查 "登录状态/锁屏状态" 开始
@@ -205,42 +205,66 @@
 								var waiting = plus.nativeUI.showWaiting();
 								auth.login(function() {
 									auth.getUserInfo(function() {
-										var name = auth.userInfo.nickname || auth.userInfo.name;
-										var user ={
-											"name":name,
-											"openId":auth.userInfo.openid
+										var authId;
+										var authType;
+										if (auth.userInfo.id) {
+											authId = auth.userInfo.idstr,
+											authType = "wb"
+										} else if (auth.userInfo.openid) {
+											authId = auth.userInfo.openid,
+											authType = "wx"
+										} else if (auth.userInfo.unionid) {
+											authId = auth.userInfo.unionid,
+											authType = "qq"
 										}
-										mui.ajax(serverAddr + "/user/calc/wxLogin", {
-											data: user,
-											dataType: 'json', //服务器返回json格式数据
-											type: 'post', //HTTP请求类型
-											timeout: 10000, //超时时间设置为10秒；
-											headers: {
-												'Content-Type': 'application/json'
-											},
-											success: function(data) {
-												waiting.close();
-												if (data.code == 200) {
-													console.log(JSON.stringify(data.data))
-													plus.nativeUI.toast("登录成功");
-													localStorage.setItem("userInfo", JSON.stringify(
-														data.data))
-													toMain();
-												} else {
-													plus.nativeUI.toast(data.msg);
+
+										var name = auth.userInfo.nickname || auth
+											.userInfo.name;
+										var user = {
+											"name": name,
+											"authId": authId,
+											"authType": authType
+										}
+										mui.ajax(serverAddr +
+											"/user/calc/thirdLogin", {
+												data: user,
+												dataType: 'json', //服务器返回json格式数据
+												type: 'post', //HTTP请求类型
+												timeout: 10000, //超时时间设置为10秒；
+												headers: {
+													'Content-Type': 'application/json'
+												},
+												success: function(data) {
+													waiting.close();
+													if (data.code == 200) {
+														plus.nativeUI.toast(
+															"登录成功");
+														localStorage.setItem(
+															"userInfo",
+															JSON
+															.stringify(
+																data.data
+															))
+														toMain();
+													} else {
+														plus.nativeUI.toast(
+															data.msg);
+													}
+
+												},
+												error: function(xhr, type,
+													errorThrown) {
+													waiting.close();
+													//异常处理；
+													if (type == "timeout") {
+														plus.nativeUI.toast(
+															"请求超时");
+													} else {
+														plus.nativeUI.toast(
+															"请求失败");
+													}
 												}
-										
-											},
-											error: function(xhr, type, errorThrown) {
-												waiting.close();
-												//异常处理；
-												if (type == "timeout") {
-													plus.nativeUI.toast("请求超时");
-												} else {
-													plus.nativeUI.toast("请求失败");
-												}
-											}
-										});
+											});
 									}, function(e) {
 										plus.nativeUI.toast("获取用户信息失败：" + e.message);
 									});

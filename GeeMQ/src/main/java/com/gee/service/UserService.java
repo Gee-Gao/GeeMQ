@@ -67,7 +67,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public User wxLogin(User user) {
         User one = getOne(new LambdaQueryWrapper<User>()
-                .eq(User::getOpenId, user.getOpenId()));
+                .eq(User::getAuthId, user.getAuthId()));
 
         if (one == null) {
             save(user);
@@ -75,7 +75,5 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         } else {
             return one;
         }
-
-
     }
 }

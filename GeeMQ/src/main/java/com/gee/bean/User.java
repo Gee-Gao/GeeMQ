@@ -44,9 +44,14 @@ public class User {
     private String salt;
 
     /**
-     * 微信openId
+     * 第三方认证Id
      */
-    private String openId;
+    private String authId;
+
+    /**
+     * 第三方认证类型
+     */
+    private String authType;
 
     /**
      * 创建时间
