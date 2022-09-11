@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -130,7 +131,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
 
     public Map<String, Object> echarts(List<LocalDate> list) {
         HashMap<String, Object> result = new HashMap<>();
-        if(list.size()<2){
+        if (list.size() < 2) {
             result.put("message", "此功能需保存两次及以上记录");
             return result;
         }
@@ -191,5 +192,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         LocalDate before = list.get(i);
         LocalDate after = list.get(i + 1);
         return before.until(after, ChronoUnit.DAYS);
+    }
+
+    public List<Aunt> queryAuntList(Aunt aunt) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+        List<Aunt> list = list(new LambdaQueryWrapper<Aunt>()
+                .eq(Aunt::getUserId, aunt.getUserId())
+                .orderByAsc(Aunt::getAuntDate));
+        list.forEach(item -> item.setAuntDateStr(dateFormat.format(item.getAuntDate())));
+        return list;
     }
 }

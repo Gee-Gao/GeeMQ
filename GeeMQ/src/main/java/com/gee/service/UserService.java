@@ -65,7 +65,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         return stringBuilder.toString();
     }
 
-    public User wxLogin(User user) {
+    public User thirdLogin(User user) {
         User one = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getAuthId, user.getAuthId()));
 

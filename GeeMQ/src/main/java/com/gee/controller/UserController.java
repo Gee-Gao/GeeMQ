@@ -45,7 +45,7 @@ public class UserController {
 
     @PostMapping("thirdLogin")
     private Result thirdLogin(@RequestBody User user) {
-        User login = userService.wxLogin(user);
+        User login = userService.thirdLogin(user);
         return Result.ok(login);
     }
 

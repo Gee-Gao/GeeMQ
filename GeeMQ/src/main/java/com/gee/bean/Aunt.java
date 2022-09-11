@@ -32,6 +32,12 @@ public class Aunt {
     private Date auntDate;
 
     /**
+     * 姨妈日期字符串
+     */
+    @TableField(exist = false)
+    private String auntDateStr;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

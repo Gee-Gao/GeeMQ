@@ -1,6 +1,5 @@
 package com.gee.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.gee.bean.Aunt;
 import com.gee.bean.Result;
 import com.gee.bean.User;
@@ -20,9 +19,7 @@ public class AuntController {
 
     @PostMapping("/list")
     public Result queryAuntList(@RequestBody Aunt aunt) {
-        List<Aunt> list = auntService.list(new LambdaQueryWrapper<Aunt>()
-                .eq(Aunt::getUserId, aunt.getUserId())
-                .orderByAsc(Aunt::getAuntDate));
+        List<Aunt> list =  auntService.queryAuntList(aunt);
         return Result.ok(list);
     }
 
@@ -50,4 +47,11 @@ public class AuntController {
         List<LocalDate> list = auntService.getAuntLocalDate(user);
         return Result.ok(auntService.echarts(list));
     }
+
+    @PostMapping("/delete")
+    public Result deleteAunt(@RequestBody Aunt aunt) {
+        auntService.removeById(aunt);
+        return Result.ok();
+    }
+
 }
