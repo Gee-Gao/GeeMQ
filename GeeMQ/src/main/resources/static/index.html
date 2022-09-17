@@ -26,23 +26,27 @@
 
 	<body>
 		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
-			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
-			<h1 class="mui-title">姨妈分析</h1>
-		
+			<h1 class="mui-title">首页</h1>
 		</header>
 
 		
 		<div id="content"  class="mui-content">
 				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+					    <a class="mui-navigate-right" id="auntRecord">姨妈记录</a>
+					</li>
 				    <li class="mui-table-view-cell">
 				        <a class="mui-navigate-right" id="auntInterval">姨妈间隔</a>
 				    </li>
 				    <li class="mui-table-view-cell">
-				        <a class="mui-navigate-right" id="auntRecord">姨妈记录</a>
+				        <a class="mui-navigate-right" id="auntAnalyze">姨妈分析</a>
 				    </li>
 				    <li class="mui-table-view-cell">
 				        <a class="mui-navigate-right" id='echarts'>图表分析</a>
 				    </li>
+					<li class="mui-table-view-cell">
+					    <a class="mui-navigate-right" id='logout'>退出登录</a>
+					</li>
 				</ul>
 		</div>
 
@@ -55,19 +59,14 @@
 
 
 				$.plusReady(function() {
-					var settingPage = $.preload({
-						"id": 'setting',
-						"url": 'setting.html'
-					});
-
 					var userinfoJson = localStorage.getItem("userInfo");
 
 					var userinfo = JSON.parse(userinfoJson);
 					
-					doc.getElementById("backToMain").addEventListener("tap", function() {
+					doc.getElementById("auntRecord").addEventListener("tap", function() {
 						$.openWindow({
-							url: 'main.html',
-							id: 'main'+ new Date().getTime(),
+							url: 'auntRecord.html',
+							id: 'auntRecord'+ new Date().getTime(),
 						});
 					})
 					
@@ -78,18 +77,25 @@
 						});
 					})
 					
-					doc.getElementById("auntRecord").addEventListener("tap", function() {
+					doc.getElementById("auntAnalyze").addEventListener("tap", function() {
 						$.openWindow({
-							url: 'auntRecord.html',
-							id: 'auntRecord'+ new Date().getTime(),
+							url: 'auntAnalyze.html',
+							id: 'auntAnalyze'+ new Date().getTime(),
 						});
 					})
 					
 					doc.getElementById("echarts").addEventListener("tap", function() {
-						//plus.webview.getWebviewById('echarts').reload();
 						$.openWindow({
 							url: 'echarts.html',
-							id: 'echarts',
+							id: 'echarts'+ new Date().getTime(),
+						});
+					})
+					
+					doc.getElementById("logout").addEventListener("tap", function() {
+						localStorage.removeItem("rememberUser")
+						$.openWindow({
+							url: 'login.html',
+							id: 'login',
 						});
 					})
 

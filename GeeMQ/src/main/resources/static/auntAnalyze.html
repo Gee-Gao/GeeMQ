@@ -9,8 +9,12 @@
 		<link href="css/mui.min.css" rel="stylesheet" />
 
 		<style>
+			li{
+				text-align: right;
+			}
+			
 			ul {
-				font-size: 14px;
+				font-size: 16px;
 				color: #8f8f94;
 			}
 
@@ -26,17 +30,13 @@
 
 	<body>
 		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
-			<h1 class="mui-title">姨妈记录</h1>
-			<button id='analyzer' class=" mui-pull-right mui-btn-link">姨妈分析</button>
+			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
+			<h1 class="mui-title">姨妈分析</h1>
+			<button id='echarts' class=" mui-pull-right mui-btn-link"></button>
 		</header>
-		<div class="mui-content">
-			<div class="mui-content-padded">
-				<button id='addRecord' class="mui-btn mui-btn-block mui-btn-green">新增记录</button>
-				<ul id="list" class="mui-table-view">
 
-				</ul>
-			</div>
-		</div>
+		<div id="content"  class="mui-content"></div>
+
 		<script src="js/mui.min.js"></script>
 		<script src="js/app.js"></script>
 		<script src="js/config.js"></script>
@@ -46,17 +46,12 @@
 
 
 				$.plusReady(function() {
-					var settingPage = $.preload({
-						"id": 'setting',
-						"url": 'setting.html'
-					});
-
-
 					var userinfoJson = localStorage.getItem("userInfo");
+
 					var userinfo = JSON.parse(userinfoJson);
-					mui.ajax(serverAddr + "/aunt/calc/list", {
+					mui.ajax(serverAddr + "/aunt/calc/auntRecord", {
 						data: {
-							"userId": userinfo.id
+							"id": userinfo.id
 						},
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
@@ -65,18 +60,29 @@
 							'Content-Type': 'application/json'
 						},
 						success: function(data) {
-							var html = '';
-							if (data.code == 200) {
-								var list = data.data;
-								for (let i = 0; i < list.length; i++) {
-									html += '<li class="mui-table-view-cell">' + list[i].auntDate +
-										'</li>';
+							var calcData = data.data;
+
+							var html ='<ul class="mui-table-view">'
+							if(calcData.message){
+								html +='<li class="mui-table-view-cell">' + calcData.message +'</li>'
+							}else{
+								var html ='<ul class="mui-table-view">'
+								for(var i =0;i<calcData.dayCount.length;i++){
+									html +=	'<li class="mui-table-view-cell">' + calcData.dayCount[i] + '</li>'
 								}
-								document.getElementById("list").innerHTML = html;
-
+								 html+='</ul><br>'
+									+'<ul class="mui-table-view">'
+										+'<li class="mui-table-view-cell">' + calcData.min +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.max +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.avg +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.daysMax +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.nextDays +'</li>'
+									
+									
+								
 							}
-
-
+							html += '</ul>'
+							doc.getElementById("content").innerHTML = html;
 						},
 						error: function(xhr, type, errorThrown) {
 							//异常处理；
@@ -87,37 +93,14 @@
 							}
 						}
 					});
-
-					doc.getElementById('addRecord').addEventListener("tap", function() {
-						var auntAdd = plus.webview.getWebviewById('auntAdd');
-						if (auntAdd) {
-							auntAdd.reload();
-						}
-
+					doc.getElementById("backToMain").addEventListener("tap", function() {
 						$.openWindow({
-							url: 'auntAdd.html',
-							id: 'auntAdd',
+							url: 'index.html',
+							id: 'index',
 						});
-					});
+					})
+				
 
-					window.onload = function() {
-						window.addEventListener('refresh', function() {
-							init();
-						})
-					}
-					// 分析
-					var analyzerButton = doc.getElementById('analyzer');
-					analyzerButton.addEventListener('tap', function(event) {
-						var analyzer = plus.webview.getWebviewById('analyzer')
-						if(analyzer){
-							analyzer.reload();
-						}
-						$.openWindow({
-							url: 'analyzer.html',
-							id: 'analyzer',
-						});
-					});
-					//--
 					$.oldBack = mui.back;
 					var backButtonPress = 0;
 					$.back = function(event) {

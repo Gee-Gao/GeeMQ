@@ -9,19 +9,15 @@
 		<link href="css/mui.min.css" rel="stylesheet" />
 
 		<style>
-			li{
-				text-align: right;
-			}
-			
 			ul {
-				font-size: 16px;
+				font-size: 14px;
 				color: #8f8f94;
 			}
 
 			.mui-btn {
-				padding: 10px;
+				padding: 6px;
 			}
-			
+
 			* {
 				touch-action: pan-y;
 			}
@@ -31,12 +27,16 @@
 	<body>
 		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
 			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
-			<h1 class="mui-title">姨妈分析</h1>
-			<button id='echarts' class=" mui-pull-right mui-btn-link"></button>
+			<h1 class="mui-title">姨妈记录</h1>
 		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<button id='addRecord' class="mui-btn mui-btn-block mui-btn-green">新增记录</button>
+				<ul id="list" class="mui-table-view">
 
-		<div id="content"  class="mui-content"></div>
-
+				</ul>
+			</div>
+		</div>
 		<script src="js/mui.min.js"></script>
 		<script src="js/app.js"></script>
 		<script src="js/config.js"></script>
@@ -46,73 +46,25 @@
 
 
 				$.plusReady(function() {
-					var settingPage = $.preload({
-						"id": 'setting',
-						"url": 'setting.html'
+					doc.getElementById('addRecord').addEventListener("tap", function() {
+						$.openWindow({
+							url: 'auntAdd.html',
+							id: 'auntAdd'+new Date().getTime(),
+						});
 					});
 
-					var userinfoJson = localStorage.getItem("userInfo");
-
-					var userinfo = JSON.parse(userinfoJson);
-					mui.ajax(serverAddr + "/aunt/calc/auntRecord", {
-						data: {
-							"id": userinfo.id
-						},
-						dataType: 'json', //服务器返回json格式数据
-						type: 'post', //HTTP请求类型
-						timeout: 10000, //超时时间设置为10秒；
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						success: function(data) {
-							var calcData = data.data;
-
-							var html ='<ul class="mui-table-view">'
-							if(calcData.message){
-								html +='<li class="mui-table-view-cell">' + calcData.message +'</li>'
-							}else{
-								var html ='<ul class="mui-table-view">'
-								for(var i =0;i<calcData.dayCount.length;i++){
-									html +=	'<li class="mui-table-view-cell">' + calcData.dayCount[i] + '</li>'
-								}
-								 html+='</ul><br>'
-									+'<ul class="mui-table-view">'
-										+'<li class="mui-table-view-cell">' + calcData.min +'</li>'
-										+'<li class="mui-table-view-cell">' + calcData.max +'</li>'
-										+'<li class="mui-table-view-cell">' + calcData.avg +'</li>'
-										+'<li class="mui-table-view-cell">' + calcData.daysMax +'</li>'
-										+'<li class="mui-table-view-cell">' + calcData.nextDays +'</li>'
-									
-									
-								
-							}
-							html += '</ul>'
-							doc.getElementById("content").innerHTML = html;
-						},
-						error: function(xhr, type, errorThrown) {
-							//异常处理；
-							if (type == "timeout") {
-								plus.nativeUI.toast("请求超时");
-							} else {
-								plus.nativeUI.toast("请求失败");
-							}
-						}
-					});
+					window.onload = function() {
+						window.addEventListener('refresh', function() {
+							init();
+						})
+					}
+							
 					doc.getElementById("backToMain").addEventListener("tap", function() {
 						$.openWindow({
-							url: 'analyzer.html',
-							id: 'analyzer'+new Date().getTime(),
+							url: 'index.html',
+							id: 'index',
 						});
 					})
-					
-					doc.getElementById("echarts").addEventListener("tap", function() {
-						
-						$.openWindow({
-							url: 'echarts.html',
-							id: 'echarts'+new Date().getTime(),
-						});
-					})
-
 					$.oldBack = mui.back;
 					var backButtonPress = 0;
 					$.back = function(event) {
@@ -129,6 +81,74 @@
 					};
 				});
 			}(mui, document));
+
+			function init() {
+				var userinfoJson = localStorage.getItem("userInfo");
+				var userinfo = JSON.parse(userinfoJson);
+				mui.ajax(serverAddr + "/aunt/calc/list", {
+					data: {
+						"userId": userinfo.id
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					success: function(data) {
+						var html = '';
+						if (data.code == 200) {
+							var list = data.data;
+							for (let i = 0; i < list.length; i++) {
+								html += '<li class="mui-table-view-cell">' + list[i].auntDateStr +
+									'<button type="button" class="mui-btn mui-btn-danger" id=' + list[i].id +
+									' onclick="fun(this)">删除</button></li>';
+							}
+							document.getElementById("list").innerHTML = html;
+
+						}
+
+
+					},
+					error: function(xhr, type, errorThrown) {
+						//异常处理；
+						if (type == "timeout") {
+							plus.nativeUI.toast("请求超时");
+						} else {
+							plus.nativeUI.toast("请求失败");
+						}
+					}
+				});
+			}
+
+			init()
+
+			function fun(obj) {
+			
+				mui.ajax(serverAddr + "/aunt/calc/delete", {
+					data: {
+						"id": obj.id
+					},
+					dataType: 'json', //服务器返回json格式数据
+					type: 'post', //HTTP请求类型
+					timeout: 10000, //超时时间设置为10秒；
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					success: function(data) {
+						plus.nativeUI.toast("删除成功");
+						init();
+					},
+					error: function(xhr, type, errorThrown) {
+						//异常处理；
+						if (type == "timeout") {
+							plus.nativeUI.toast("请求超时");
+						} else {
+							plus.nativeUI.toast("请求失败");
+						}
+					}
+				});
+			}
 		</script>
 	</body>
 

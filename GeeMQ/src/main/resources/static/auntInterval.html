@@ -31,7 +31,7 @@
 	<body>
 		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
 			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
-			<h1 class="mui-title">姨妈分析</h1>
+			<h1 class="mui-title">姨妈间隔</h1>
 			<button  class=" mui-pull-right mui-btn-link"></button>
 		</header>
 
@@ -46,11 +46,6 @@
 
 
 				$.plusReady(function() {
-					var settingPage = $.preload({
-						"id": 'setting',
-						"url": 'setting.html'
-					});
-
 					var userinfoJson = localStorage.getItem("userInfo");
 
 					var userinfo = JSON.parse(userinfoJson);
@@ -86,8 +81,8 @@
 					});
 					doc.getElementById("backToMain").addEventListener("tap", function() {
 						$.openWindow({
-							url: 'analyzer.html',
-							id: 'analyzer'+new Date().getTime(),
+							url: 'index.html',
+							id: 'index',
 						});
 					})
 					

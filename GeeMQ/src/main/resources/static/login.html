@@ -112,7 +112,7 @@
 				<ul class="mui-table-view mui-table-view-chevron">
 					<li class="mui-table-view-cell">
 						自动登录
-						<div id="autoLogin" class="mui-switch">
+						<div id="autoLogin" class="mui-switch ">
 							<div class="mui-switch-handle"></div>
 						</div>
 					</li>
@@ -157,22 +157,12 @@
 					});
 					var toMain = function() {
 						$.openWindow({
-							url: 'main.html',
-							id: 'main' + new Date().getTime(),
-						});
+							url: 'index.html',
+							id: 'index',});
 					};
 					//检查 "登录状态/锁屏状态" 开始
 					if (settings.autoLogin && state.token && settings.gestures) {
-						$.openWindow({
-							url: 'unlock.html',
-							id: 'unlock',
-							show: {
-								aniShow: 'pop-in'
-							},
-							waiting: {
-								autoShow: false
-							}
-						});
+
 					} else if (settings.autoLogin && state.token) {
 						toMain();
 					} else {
@@ -209,13 +199,13 @@
 										var authType;
 										if (auth.userInfo.id) {
 											authId = auth.userInfo.idstr,
-											authType = "wb"
+												authType = "wb"
 										} else if (auth.userInfo.openid) {
 											authId = auth.userInfo.openid,
-											authType = "wx"
+												authType = "wx"
 										} else if (auth.userInfo.unionid) {
 											authId = auth.userInfo.unionid,
-											authType = "qq"
+												authType = "qq"
 										}
 
 										var name = auth.userInfo.nickname || auth
@@ -291,54 +281,66 @@
 					var regButton = doc.getElementById('reg');
 					var forgetButton = doc.getElementById('forgetPassword');
 					loginButton.addEventListener('tap', function(event) {
+						var autoLoginStatus = JSON.parse(localStorage.getItem("autoLogin"));
+
 						var loginInfo = {
 							username: accountBox.value,
 							password: passwordBox.value
 						};
+
+
 						app.login(loginInfo, function(err) {
 							if (err) {
 								plus.nativeUI.toast(err);
 								return;
 							}
-							mui.ajax(serverAddr + "/user/calc/login", {
-								data: loginInfo,
-								dataType: 'json', //服务器返回json格式数据
-								type: 'post', //HTTP请求类型
-								timeout: 10000, //超时时间设置为10秒；
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								success: function(data) {
-									if (data.code == 200) {
-										plus.nativeUI.toast("登录成功");
-										localStorage.setItem("userInfo", JSON.stringify(
-											data.data))
-										toMain();
-									} else {
-										plus.nativeUI.toast(data.msg);
-									}
 
-								},
-								error: function(xhr, type, errorThrown) {
-									//异常处理；
-									if (type == "timeout") {
-										plus.nativeUI.toast("请求超时");
-									} else {
-										plus.nativeUI.toast("请求失败");
-									}
-								}
-							});
+							login(loginInfo)
 						});
 					});
+					
+					if (localStorage.getItem("rememberUser")) {
+						var rememberUser = JSON.parse(localStorage.getItem("rememberUser"));
+						login(rememberUser)
+
+					}
+
+					function login(loginInfo) {
+						mui.ajax(serverAddr + "/user/calc/login", {
+							data: loginInfo,
+							dataType: 'json', //服务器返回json格式数据
+							type: 'post', //HTTP请求类型
+							timeout: 10000, //超时时间设置为10秒；
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							success: function(data) {
+								if (data.code == 200) {
+									var isActive = document.getElementById("autoLogin").classList
+										.contains("mui-active");
+									if (isActive) {
+										localStorage.setItem("rememberUser", JSON.stringify(loginInfo))
+									}
+									localStorage.setItem("userInfo", JSON.stringify(data.data))
+									toMain();
+								} else {
+									plus.nativeUI.toast(data.msg);
+								}
+
+							},
+							error: function(xhr, type, errorThrown) {
+								//异常处理；
+								if (type == "timeout") {
+									plus.nativeUI.toast("请求超时");
+								} else {
+									plus.nativeUI.toast("请求失败");
+								}
+							}
+						});
+					}
 
 					autoLoginButton.classList[settings.autoLogin ? 'add' : 'remove']('mui-active')
-					autoLoginButton.addEventListener('toggle', function(event) {
-						setTimeout(function() {
-							var isActive = event.detail.isActive;
-							settings.autoLogin = isActive;
-							app.setSettings(settings);
-						}, 50);
-					}, false);
+
 					regButton.addEventListener('tap', function(event) {
 						$.openWindow({
 							url: 'reg.html',

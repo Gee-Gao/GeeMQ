@@ -45,14 +45,14 @@
 
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
 			<h1 class="mui-title">图表分析</h1>
 		</header>
 		<div class="mui-content">
 			<div id="echartsContent" class="mui-content-padded">
 				<h5>天数占比</h5>
 				<div class="chart" id="percentData"></div>
-				<h5>天数趋势</h5>
+				<h5>最近7个月天数趋势</h5>
 				<div class="chart" style="" id="lineChart"></div>
 			</div>
 		</div>
@@ -64,14 +64,7 @@
 		<script>
 			(function($, doc) {
 				$.init();
-
-
 				$.plusReady(function() {
-					var settingPage = $.preload({
-						"id": 'setting',
-						"url": 'setting.html'
-					});
-
 					var userinfoJson = localStorage.getItem("userInfo");
 
 					var userinfo = JSON.parse(userinfoJson);
@@ -101,7 +94,7 @@
 									XDaysTrend.push(daysTrend[j].name);
 									yDaysTrend.push(daysTrend[j].value)
 								}
-
+								
 								var percentData = document.getElementById('percentData');
 								var lineChart = document.getElementById('lineChart');
 
@@ -149,7 +142,7 @@
 											textStyle: {
 												color: "#65D5FF" //X轴文字颜色
 											},
-											interval: daysTrend.length > 6 ? 1 : 0,
+											interval: 0,
 											formatter: function(value) {
 												var rowMAx = 5; // 控制一行多少字
 												var overValue = ''
@@ -202,8 +195,12 @@
 						}
 					});
 
-
-
+					doc.getElementById("backToMain").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'index.html',
+							id: 'index',
+						});
+					})
 					$.oldBack = mui.back;
 					var backButtonPress = 0;
 					$.back = function(event) {
