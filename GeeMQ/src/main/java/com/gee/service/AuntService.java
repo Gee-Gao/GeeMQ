@@ -23,6 +23,13 @@ import java.util.stream.Collectors;
 @Service
 public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
 
+    /**
+     * @description 保存姨妈
+     *
+	 * @param aunt 姨妈参数
+     * @author Gee
+     * @createTime 2022/9/18 1:31
+     */
     public void saveAunt(Aunt aunt) {
         if (aunt.getAuntDate() == null) {
             throw new GeeException("未选择姨妈日期");
@@ -40,6 +47,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
 
     }
 
+    /**
+     * @description 获取LocalDate类型的姨妈日期
+     *
+	 * @param user 登录用户
+     * @return List<LocalDate> 姨妈日期
+     * @author Gee
+     * @createTime 2022/9/18 1:32
+     */
     public List<LocalDate> getAuntLocalDate(User user) {
         List<Aunt> auntList = list(new LambdaQueryWrapper<Aunt>()
                 .eq(Aunt::getUserId, user.getId())
@@ -50,6 +65,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * @description 获取姨妈间隔
+     *
+	 * @param list 姨妈日期列表
+     * @return List<String> 姨妈间隔
+     * @author Gee
+     * @createTime 2022/9/18 1:33
+     */
     public List<String> auntInterval(List<LocalDate> list) {
         List<String> auntInterval = new ArrayList<>();
         if (list.size() >= 2) {
@@ -68,6 +91,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         return auntInterval;
     }
 
+    /**
+     * @description 姨妈分析
+     *
+	 * @param list 姨妈日期列表
+     * @return Map< String,Object> 姨妈分析结果
+     * @author Gee
+     * @createTime 2022/9/18 1:35
+     */
     public Map<String, Object> auntRecord(List<LocalDate> list) {
         Map<String, Object> result = new HashMap<>();
         if (list.size() < 2) {
@@ -129,6 +160,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     }
 
 
+    /**
+     * @description 图表分析
+     *
+     * @param list 姨妈日期列表
+     * @return Map< String,Object> 图表分析结果
+     * @author Gee
+     * @createTime 2022/9/18 1:35
+     */
     public Map<String, Object> echarts(List<LocalDate> list) {
         HashMap<String, Object> result = new HashMap<>();
         if (list.size() < 2) {
@@ -174,6 +213,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         return result;
     }
 
+    /**
+     * @description 获取姨妈天数出现次数
+     *
+     * @param list 姨妈日期列表
+     * @return TreeMap<Long, Long> 姨妈天数出现次数
+     * @author Gee
+     * @createTime 2022/9/18 1:35
+     */
     public TreeMap<Long, Long> getCountWithDays(List<LocalDate> list) {
         TreeMap<Long, Long> countWithDays = new TreeMap<>();
         for (int i = 0; i < list.size() - 1; i++) {
@@ -188,12 +235,29 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         return countWithDays;
     }
 
+    /**
+     * @description 获取姨妈时间差
+     *
+     * @param list 姨妈日期列表
+     * @param i 第几个元素
+     * @return long 姨妈时间差
+     * @author Gee
+     * @createTime 2022/9/18 1:35
+     */
     private long getDaySubtract(List<LocalDate> list, int i) {
         LocalDate before = list.get(i);
         LocalDate after = list.get(i + 1);
         return before.until(after, ChronoUnit.DAYS);
     }
 
+    /**
+     * @description 查询姨妈列表
+     *
+	 * @param aunt 姨妈参数
+     * @return List<Aunt> 姨妈列表
+     * @author Gee
+     * @createTime 2022/9/18 1:38
+     */
     public List<Aunt> queryAuntList(Aunt aunt) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
         List<Aunt> list = list(new LambdaQueryWrapper<Aunt>()
