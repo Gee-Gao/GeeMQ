@@ -51,7 +51,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     }
 
     public List<String> auntInterval(List<LocalDate> list) {
-        List<String> auntInterval = new ArrayList<>(list.size() - 1);
+        List<String> auntInterval = new ArrayList<>();
         if (list.size() >= 2) {
             for (int i = 0; i < list.size() - 1; i++) {
                 LocalDate before = list.get(i);
