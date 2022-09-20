@@ -1,12 +1,14 @@
 package com.gee.service;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gee.bean.Aunt;
+import com.gee.bean.AuntAnalyzer;
 import com.gee.bean.EchartsData;
-import com.gee.bean.User;
 import com.gee.config.GeeException;
 import com.gee.mapper.AuntMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,7 +23,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
+
+    private final AuntMapper auntMapper;
+
+    private final AuntAnalyzerService auntAnalyzerService;
 
     /**
      * @description 保存姨妈
@@ -44,20 +51,21 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         }
 
         save(aunt);
-
+        List<LocalDate> auntLocalDate = getAuntLocalDate(aunt);
+        auntAnalyzer(auntLocalDate,aunt.getUserId());
     }
 
     /**
      * @description 获取LocalDate类型的姨妈日期
      *
-	 * @param user 登录用户
+	 * @param aunt 姨妈参数
      * @return List<LocalDate> 姨妈日期
      * @author Gee
      * @createTime 2022/9/18 1:32
      */
-    public List<LocalDate> getAuntLocalDate(User user) {
+    public List<LocalDate> getAuntLocalDate(Aunt aunt) {
         List<Aunt> auntList = list(new LambdaQueryWrapper<Aunt>()
-                .eq(Aunt::getUserId, user.getId())
+                .eq(Aunt::getUserId, aunt.getUserId())
                 .orderByAsc(Aunt::getAuntDate));
         return auntList.stream().map(item -> {
             Date auntDate = item.getAuntDate();
@@ -95,15 +103,26 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
      * @description 姨妈分析
      *
 	 * @param list 姨妈日期列表
+     * @param userId 登录用户id
      * @return Map< String,Object> 姨妈分析结果
      * @author Gee
      * @createTime 2022/9/18 1:35
      */
-    public Map<String, Object> auntRecord(List<LocalDate> list) {
-        Map<String, Object> result = new HashMap<>();
+    public void auntAnalyzer(List<LocalDate> list, String userId) {
+        AuntAnalyzer auntAnalyzer = auntAnalyzerService.getOne(new LambdaQueryWrapper<AuntAnalyzer>()
+                .eq(AuntAnalyzer::getUserId, userId));
+
         if (list.size() < 2) {
-            result.put("message", "此功能需保存两次及以上记录");
-            return result;
+            if(auntAnalyzer ==null) {
+                auntAnalyzer = new AuntAnalyzer();
+                auntAnalyzer.setUserId(userId);
+                auntAnalyzer.setMessage("此功能需保存两次及以上记录");
+                auntAnalyzerService.save(auntAnalyzer);
+            } else {
+                auntAnalyzer.setMessage("此功能需保存两次及以上记录");
+                auntAnalyzerService.updateById(auntAnalyzer);
+            }
+            return;
         }
 
         LocalDate first = list.get(0);
@@ -127,7 +146,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         }
         TreeMap<Long, Long> countWithDays = getCountWithDays(list);
         AtomicLong maxCount = new AtomicLong(0L);
-        Map<Long, BigDecimal> percentData = new HashMap<>();
+
         StringBuilder daysMax = new StringBuilder();
         List<String> dayCount = new ArrayList<>();
         countWithDays.forEach((day, count) -> {
@@ -149,14 +168,27 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         BigDecimal avg = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
         LocalDate nextDay = list.get(list.size() - 1).plusDays(
                 new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP).longValue());
-        result.put("min", "最小间隔: " + min + "天");
-        result.put("max", "最大间隔: " + max + "天");
-        result.put("avg", "平均间隔: " + avg + "天");
-        result.put("daysMax", daysMax);
-        result.put("dayCount", dayCount);
-        result.put("nextDays", "预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
-        result.put("percentData", percentData);
-        return result;
+        if(auntAnalyzer==null){
+            auntAnalyzer = new AuntAnalyzer();
+            appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
+            auntAnalyzer.setUserId(userId);
+            auntAnalyzerService.save(auntAnalyzer);
+        }else {
+            appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
+            auntAnalyzerService.updateById(auntAnalyzer);
+        }
+
+
+    }
+
+    private void appendAnalyzerData(AuntAnalyzer auntAnalyzer, long min, long max, StringBuilder daysMax, List<String> dayCount, BigDecimal avg, LocalDate nextDay) {
+        auntAnalyzer.setMinDay("最小间隔: " + min + "天");
+        auntAnalyzer.setMaxDay("最大间隔: " + max + "天");
+        auntAnalyzer.setAvgDay("平均间隔: " + avg + "天");
+        auntAnalyzer.setDaysMax(daysMax.toString());
+        auntAnalyzer.setDayCount(dayCount.stream().map(String::valueOf).collect(Collectors.joining(",")));
+        auntAnalyzer.setNextDate(nextDay);
+        auntAnalyzer.setNextDays("预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
     }
 
 
@@ -265,5 +297,85 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 .orderByAsc(Aunt::getAuntDate));
         list.forEach(item -> item.setAuntDateStr(dateFormat.format(item.getAuntDate())));
         return list;
+    }
+
+    /**
+     * @description 获取安全期和危险期
+     *
+     * @param aunt 姨妈参数
+     * @return Map<String, Object> 安全期和危险期
+     * @author Gee
+     * @createTime 2022/9/18 11:05bu
+     */
+    public Map<String, Object> calendar(Aunt aunt) {
+        Map<String, Object> result = new HashMap<>(2);
+        Aunt lastAunt = auntMapper.calendar(aunt);
+        if (lastAunt == null) {
+            result.put("message", "此功能需保存一次记录");
+        } else {
+            Date auntDate = lastAunt.getAuntDate();
+            LocalDate startDate = auntDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            // 安全期
+            List<LocalDate> safePeriod = new ArrayList<>(14);
+            for (int i = 7; i >= 1; i--) {
+                safePeriod.add(startDate.plusDays(-i));
+            }
+            LocalDate endDate = startDate.plusDays(5L);
+            for (int i = 1; i <= 7; i++) {
+                safePeriod.add(endDate.plusDays(i));
+            }
+            result.put("safePeriod", safePeriod);
+
+            // 排卵日
+            LocalDate ovulationDay = startDate.plusDays(14L);
+
+            // 危险期
+            List<LocalDate> dangerousPeriod = new ArrayList<>(14);
+            for (int i = 3; i >= 1; i--) {
+                dangerousPeriod.add(ovulationDay.plusDays(-i));
+            }
+            dangerousPeriod.add(ovulationDay);
+            for (int i = 1; i <= 5; i++) {
+                dangerousPeriod.add(ovulationDay.plusDays(i));
+            }
+            result.put("dangerousPeriod", dangerousPeriod);
+        }
+        return result;
+    }
+
+    /**
+     * @description 姨妈分析
+     *
+	 * @param aunt 姨妈参数
+     * @return Map<String, Object>
+     * @author Gee
+     * @createTime 2022/9/18 16:59
+     */
+    public Map<String, Object> auntAnalyzer(Aunt aunt) {
+        Map<String, Object> result = new HashMap<>();
+        AuntAnalyzer auntAnalyzer = auntAnalyzerService.getOne(new LambdaQueryWrapper<AuntAnalyzer>()
+                .eq(AuntAnalyzer::getUserId, aunt.getUserId()));
+        if (auntAnalyzer == null) {
+            result.put("message", "此功能需保存两次及以上记录");
+        } else {
+            if (StrUtil.isBlank(auntAnalyzer.getMessage())) {
+                result.put("min", auntAnalyzer.getMinDay());
+                result.put("max", auntAnalyzer.getDaysMax());
+                result.put("avg", auntAnalyzer.getAvgDay());
+                result.put("daysMax", auntAnalyzer.getDaysMax());
+                String[] dayCount = auntAnalyzer.getDayCount().split(",");
+                result.put("dayCount", dayCount);
+                result.put("nextDays", auntAnalyzer.getNextDays());
+            } else {
+                result.put("message", auntAnalyzer.getMessage());
+            }
+        }
+        return result;
+    }
+
+    public void deleteAunt(Aunt aunt) {
+        removeById(aunt);
+        List<LocalDate> auntLocalDate = getAuntLocalDate(aunt);
+        auntAnalyzer(auntLocalDate,aunt.getUserId());
     }
 }

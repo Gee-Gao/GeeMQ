@@ -2,7 +2,6 @@ package com.gee.controller;
 
 import com.gee.bean.Aunt;
 import com.gee.bean.Result;
-import com.gee.bean.User;
 import com.gee.service.AuntService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -31,27 +30,30 @@ public class AuntController {
     }
 
     @PostMapping("/auntInterval")
-    public Result analyzerAuntInterval(@RequestBody User user) {
-        List<LocalDate> list = auntService.getAuntLocalDate(user);
+    public Result analyzerAuntInterval(@RequestBody Aunt aunt) {
+        List<LocalDate> list = auntService.getAuntLocalDate(aunt);
         return Result.ok(auntService.auntInterval(list));
     }
 
-    @PostMapping("/auntRecord")
-    public Result analyzerAuntRecord(@RequestBody User user) {
-        List<LocalDate> list = auntService.getAuntLocalDate(user);
-        return Result.ok(auntService.auntRecord(list));
+    @PostMapping("/auntAnalyzer")
+    public Result analyzerAuntRecord(@RequestBody Aunt aunt) {
+        return Result.ok(auntService.auntAnalyzer(aunt));
     }
 
     @PostMapping("/echarts")
-    public Result echarts(@RequestBody User user) {
-        List<LocalDate> list = auntService.getAuntLocalDate(user);
+    public Result echarts(@RequestBody Aunt aunt) {
+        List<LocalDate> list = auntService.getAuntLocalDate(aunt);
         return Result.ok(auntService.echarts(list));
     }
 
     @PostMapping("/delete")
     public Result deleteAunt(@RequestBody Aunt aunt) {
-        auntService.removeById(aunt);
+        auntService.deleteAunt(aunt);
         return Result.ok();
     }
 
+    @PostMapping("/calendar")
+    public Result calendar(@RequestBody Aunt aunt) {
+        return Result.ok(auntService.calendar(aunt));
+    }
 }
