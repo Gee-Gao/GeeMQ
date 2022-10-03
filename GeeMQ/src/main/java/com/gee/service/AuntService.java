@@ -66,7 +66,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     public List<LocalDate> getAuntLocalDate(Aunt aunt) {
         List<Aunt> auntList = list(new LambdaQueryWrapper<Aunt>()
                 .eq(Aunt::getUserId, aunt.getUserId())
-                .orderByDesc(Aunt::getAuntDate));
+                .orderByAsc(Aunt::getAuntDate));
         return auntList.stream().map(item -> {
             Date auntDate = item.getAuntDate();
             return auntDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -84,13 +84,13 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     public List<String> auntInterval(List<LocalDate> list) {
         List<String> auntInterval = new ArrayList<>();
         if (list.size() >= 2) {
-            for (int i = 0; i < list.size() - 1; i++) {
+            for (int i = list.size() - 1; i > 0; i--) {
                 LocalDate before = list.get(i);
-                LocalDate after = list.get(i + 1);
+                LocalDate after = list.get(i - 1);
                 long until = before.until(after, ChronoUnit.DAYS);
 
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月");
-                auntInterval.add(before.format(dateTimeFormatter) + "到" + after.format(dateTimeFormatter) + "相差" + until + "天");
+                auntInterval.add(before.format(dateTimeFormatter) + "到" + after.format(dateTimeFormatter) + "相差" + -until + "天");
             }
         } else {
             auntInterval.add("此功能需保存两次及以上记录");
