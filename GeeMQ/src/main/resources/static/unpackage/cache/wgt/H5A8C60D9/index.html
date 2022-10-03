@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+
+		<style>
+			ul {
+				font-size: 16px;
+				color: #8f8f94;
+			}
+
+			.mui-btn {
+				padding: 10px;
+			}
+			
+			* {
+				touch-action: pan-y;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<h1 class="mui-title">首页</h1>
+		</header>
+
+		
+		<div id="content"  class="mui-content">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+					    <a class="mui-navigate-right" id="auntRecord">姨妈记录</a>
+					</li>
+				    <li class="mui-table-view-cell">
+				        <a class="mui-navigate-right" id="auntInterval">姨妈间隔</a>
+				    </li>
+				    <li class="mui-table-view-cell">
+				        <a class="mui-navigate-right" id="auntAnalyze">姨妈分析</a>
+				    </li>
+				    <li class="mui-table-view-cell">
+				        <a class="mui-navigate-right" id='echarts'>图表分析</a>
+				    </li>
+					<li class="mui-table-view-cell">
+					    <a class="mui-navigate-right" id='logout'>退出登录</a>
+					</li>
+				</ul>
+		</div>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/config.js"></script>
+		<script>
+			(function($, doc) {
+				$.init();
+
+
+				$.plusReady(function() {
+					var userinfoJson = localStorage.getItem("userInfo");
+
+					var userinfo = JSON.parse(userinfoJson);
+					
+					doc.getElementById("auntRecord").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'auntRecord.html',
+							id: 'auntRecord'+ new Date().getTime(),
+						});
+					})
+					
+					doc.getElementById("auntInterval").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'auntInterval.html',
+							id: 'auntInterval'+ new Date().getTime(),
+						});
+					})
+					
+					doc.getElementById("auntAnalyze").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'auntAnalyze.html',
+							id: 'auntAnalyze'+ new Date().getTime(),
+						});
+					})
+					
+					doc.getElementById("echarts").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'echarts.html',
+							id: 'echarts'+ new Date().getTime(),
+						});
+					})
+					
+					doc.getElementById("logout").addEventListener("tap", function() {
+						localStorage.removeItem("rememberUser")
+						$.openWindow({
+							url: 'login.html',
+							id: 'login',
+						});
+					})
+
+					$.oldBack = mui.back;
+					var backButtonPress = 0;
+					$.back = function(event) {
+						backButtonPress++;
+						if (backButtonPress > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast('再按一次退出应用');
+						}
+						setTimeout(function() {
+							backButtonPress = 0;
+						}, 1000);
+						return false;
+					};
+				});
+			}(mui, document));
+		</script>
+	</body>
+
+</html>

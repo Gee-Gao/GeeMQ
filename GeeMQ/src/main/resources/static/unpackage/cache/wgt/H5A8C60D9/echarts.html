@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>ECharts 示例</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<!--标准mui.css-->
+		<link rel="stylesheet" href="css/mui.min.css">
+		<!--App自定义的css-->
+		<!-- <link rel="stylesheet" type="text/css" href="../css/app.css" /> -->
+		<style>
+			li {
+				text-align: right;
+			}
+
+			ul {
+				font-size: 16px;
+				color: #8f8f94;
+			}
+
+			.chart {
+				height: 200px;
+				margin: 0px;
+				padding: 0px;
+			}
+
+			h5 {
+				margin-top: 30px;
+				font-weight: bold;
+			}
+
+			h5:first-child {
+				margin-top: 15px;
+			}
+
+			* {
+				touch-action: pan-y;
+			}
+		</style>
+		<script src="js/mui.min.js"></script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
+			<h1 class="mui-title">图表分析</h1>
+		</header>
+		<div class="mui-content">
+			<div id="echartsContent" class="mui-content-padded">
+				<h5>天数占比</h5>
+				<div class="chart" id="percentData"></div>
+				<h5>最近7个月天数趋势</h5>
+				<div class="chart" style="" id="lineChart"></div>
+			</div>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.enterfocus.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/config.js"></script>
+		<script src="libs/echarts-all.js"></script>
+		<script>
+			(function($, doc) {
+				$.init();
+				$.plusReady(function() {
+					var userinfoJson = localStorage.getItem("userInfo");
+
+					var userinfo = JSON.parse(userinfoJson);
+					mui.ajax(serverAddr + "/aunt/calc/echarts", {
+						data: {
+							"id": userinfo.id
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							var calcData = data.data;
+							if (calcData.message) {
+								var echartsContent = document.getElementById('echartsContent');
+								var html =
+									'<ul class="mui-table-view"><li class="mui-table-view-cell">' +
+									calcData.message + '</li>'
+								echartsContent.innerHTML = html;
+							} else {
+								var XDaysTrend = [];
+								var yDaysTrend = [];
+								var daysTrend = data.data.daysTrendList;
+								for (var j = 0; j < daysTrend.length; j++) {
+									XDaysTrend.push(daysTrend[j].name);
+									yDaysTrend.push(daysTrend[j].value)
+								}
+								
+								var percentData = document.getElementById('percentData');
+								var lineChart = document.getElementById('lineChart');
+
+								var pieChart = echarts.init(percentData);
+								var lineChart = echarts.init(lineChart);
+								option = {
+									series: [{
+										name: '类型',
+										type: 'pie',
+										radius: '55%',
+										center: ['50%', '60%'],
+										data: calcData.daysPercentList,
+										itemStyle: {
+											emphasis: {
+												shadowBlur: 10,
+												shadowOffsetX: 0,
+												shadowColor: 'rgba(0, 0, 0, 0.5)'
+											},
+											normal: {
+												label: {
+													show: true,
+													formatter: '{b} ({d}%)' //带当前图例名 + 百分比
+													// formatter: '{d}%' //只要百分比
+												},
+												labelLine: {
+													show: true
+												}
+											}
+										}
+									}]
+								}
+
+
+								var daysTrendOption = {
+									grid: {
+										x: 35,
+										x2: 10,
+										y: 20,
+										y2: 60
+									},
+									calculable: true,
+									xAxis: [{
+										axisLabel: {
+											show: true,
+											textStyle: {
+												color: "#65D5FF" //X轴文字颜色
+											},
+											interval: 0,
+											formatter: function(value) {
+												var rowMAx = 5; // 控制一行多少字
+												var overValue = ''
+												for (let i = 0; i < value.length; i++) {
+													if ((i % rowMAx == 0) && (i != 0)) {
+														overValue += '\n'
+														overValue += value[i]
+													} else {
+														overValue += value[i]
+													}
+												}
+												return overValue
+											}
+										},
+										type: 'category',
+										data: XDaysTrend
+									}],
+									yAxis: [{
+										type: 'value',
+										splitArea: {
+											show: true
+										}
+									}],
+									series: [{
+										itemStyle: {
+											normal: {
+												label: {
+													show: true
+												}
+											}
+										},
+										type: "line",
+										data: yDaysTrend
+									}]
+								}
+
+								pieChart.setOption(option);
+								lineChart.setOption(daysTrendOption)
+							}
+
+
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							if (type == "timeout") {
+								plus.nativeUI.toast("请求超时");
+							} else {
+								plus.nativeUI.toast("请求失败");
+							}
+						}
+					});
+
+					doc.getElementById("backToMain").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'index.html',
+							id: 'index',
+						});
+					})
+					$.oldBack = mui.back;
+					var backButtonPress = 0;
+					$.back = function(event) {
+						backButtonPress++;
+						if (backButtonPress > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast('再按一次退出应用');
+						}
+						setTimeout(function() {
+							backButtonPress = 0;
+						}, 1000);
+						return false;
+					};
+				});
+			}(mui, document));
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link href="css/mui.min.css" rel="stylesheet" />
+
+		<style>
+			li{
+				text-align: right;
+			}
+			
+			ul {
+				font-size: 16px;
+				color: #8f8f94;
+			}
+
+			.mui-btn {
+				padding: 10px;
+			}
+			
+			* {
+				touch-action: pan-y;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
+			<h1 class="mui-title">姨妈分析</h1>
+			<button id='echarts' class=" mui-pull-right mui-btn-link"></button>
+		</header>
+
+		<div id="content"  class="mui-content"></div>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+		<script src="js/config.js"></script>
+		<script>
+			(function($, doc) {
+				$.init();
+
+
+				$.plusReady(function() {
+					var userinfoJson = localStorage.getItem("userInfo");
+
+					var userinfo = JSON.parse(userinfoJson);
+					mui.ajax(serverAddr + "/aunt/calc/auntRecord", {
+						data: {
+							"id": userinfo.id
+						},
+						dataType: 'json', //服务器返回json格式数据
+						type: 'post', //HTTP请求类型
+						timeout: 10000, //超时时间设置为10秒；
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						success: function(data) {
+							var calcData = data.data;
+
+							var html ='<ul class="mui-table-view">'
+							if(calcData.message){
+								html +='<li class="mui-table-view-cell">' + calcData.message +'</li>'
+							}else{
+								var html ='<ul class="mui-table-view">'
+								for(var i =0;i<calcData.dayCount.length;i++){
+									html +=	'<li class="mui-table-view-cell">' + calcData.dayCount[i] + '</li>'
+								}
+								 html+='</ul><br>'
+									+'<ul class="mui-table-view">'
+										+'<li class="mui-table-view-cell">' + calcData.min +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.max +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.avg +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.daysMax +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.nextDays +'</li>'
+									
+									
+								
+							}
+							html += '</ul>'
+							doc.getElementById("content").innerHTML = html;
+						},
+						error: function(xhr, type, errorThrown) {
+							//异常处理；
+							if (type == "timeout") {
+								plus.nativeUI.toast("请求超时");
+							} else {
+								plus.nativeUI.toast("请求失败");
+							}
+						}
+					});
+					doc.getElementById("backToMain").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'index.html',
+							id: 'index',
+						});
+					})
+				
+
+					$.oldBack = mui.back;
+					var backButtonPress = 0;
+					$.back = function(event) {
+						backButtonPress++;
+						if (backButtonPress > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast('再按一次退出应用');
+						}
+						setTimeout(function() {
+							backButtonPress = 0;
+						}, 1000);
+						return false;
+					};
+				});
+			}(mui, document));
+		</script>
+	</body>
+
+</html>

@@ -30,8 +30,8 @@ public class AuntAnalyzer {
     /**
      * 预计下次日期(字符串格式)
      */
-    @TableField(value = "next_days")
-    private String nextDays;
+    @TableField(value = "next_day_str")
+    private String nextDayStr;
 
     /**
      * 平均天数
@@ -68,6 +68,19 @@ public class AuntAnalyzer {
      */
     @TableField(value = "message")
     private String message;
+
+    /**
+     * 排卵期
+     */
+    @TableField(value = "ovulation")
+    private LocalDate ovulation;
+
+
+    /**
+     * 排卵期字符串
+     */
+    @TableField(value = "ovulation_str")
+    private String ovulationStr;
 
     /**
      * 创建时间

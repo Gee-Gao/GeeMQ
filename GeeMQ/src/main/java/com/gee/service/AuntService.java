@@ -66,7 +66,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     public List<LocalDate> getAuntLocalDate(Aunt aunt) {
         List<Aunt> auntList = list(new LambdaQueryWrapper<Aunt>()
                 .eq(Aunt::getUserId, aunt.getUserId())
-                .orderByAsc(Aunt::getAuntDate));
+                .orderByDesc(Aunt::getAuntDate));
         return auntList.stream().map(item -> {
             Date auntDate = item.getAuntDate();
             return auntDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -104,7 +104,6 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
      *
 	 * @param list 姨妈日期列表
      * @param userId 登录用户id
-     * @return Map< String,Object> 姨妈分析结果
      * @author Gee
      * @createTime 2022/9/18 1:35
      */
@@ -181,6 +180,19 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
 
     }
 
+    /**
+     * @description 组装姨妈分析对象
+     *
+	 * @param auntAnalyzer 待保存的姨妈分析对象
+	 * @param min 最小间隔
+	 * @param max 最大间隔
+	 * @param daysMax 出现次数最多的天数
+	 * @param dayCount 天数出现次数
+	 * @param avg 平均间隔
+	 * @param nextDay 下一次姨妈日期
+     * @author Gee
+     * @createTime 2022/9/25 15:46
+     */
     private void appendAnalyzerData(AuntAnalyzer auntAnalyzer, long min, long max, StringBuilder daysMax, List<String> dayCount, BigDecimal avg, LocalDate nextDay) {
         auntAnalyzer.setMinDay("最小间隔: " + min + "天");
         auntAnalyzer.setMaxDay("最大间隔: " + max + "天");
@@ -188,7 +200,10 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         auntAnalyzer.setDaysMax(daysMax.toString());
         auntAnalyzer.setDayCount(dayCount.stream().map(String::valueOf).collect(Collectors.joining(",")));
         auntAnalyzer.setNextDate(nextDay);
-        auntAnalyzer.setNextDays("预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
+        auntAnalyzer.setNextDayStr("预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
+        LocalDate ovulation = nextDay.plusDays(-14L);
+        auntAnalyzer.setOvulation(ovulation);
+        auntAnalyzer.setOvulationStr("预计下次排卵日为"+ovulation.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
     }
 
 
@@ -294,7 +309,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
         List<Aunt> list = list(new LambdaQueryWrapper<Aunt>()
                 .eq(Aunt::getUserId, aunt.getUserId())
-                .orderByAsc(Aunt::getAuntDate));
+                .orderByDesc(Aunt::getAuntDate));
         list.forEach(item -> item.setAuntDateStr(dateFormat.format(item.getAuntDate())));
         return list;
     }
@@ -308,37 +323,23 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
      * @createTime 2022/9/18 11:05bu
      */
     public Map<String, Object> calendar(Aunt aunt) {
+        AuntAnalyzer one = auntAnalyzerService.getOne(new LambdaQueryWrapper<AuntAnalyzer>()
+                .eq(AuntAnalyzer::getUserId, aunt.getUserId()));
         Map<String, Object> result = new HashMap<>(2);
-        Aunt lastAunt = auntMapper.calendar(aunt);
-        if (lastAunt == null) {
+        if(one == null){
             result.put("message", "此功能需保存一次记录");
-        } else {
-            Date auntDate = lastAunt.getAuntDate();
-            LocalDate startDate = auntDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            // 安全期
-            List<LocalDate> safePeriod = new ArrayList<>(14);
-            for (int i = 7; i >= 1; i--) {
-                safePeriod.add(startDate.plusDays(-i));
-            }
-            LocalDate endDate = startDate.plusDays(5L);
-            for (int i = 1; i <= 7; i++) {
-                safePeriod.add(endDate.plusDays(i));
-            }
-            result.put("safePeriod", safePeriod);
-
-            // 排卵日
-            LocalDate ovulationDay = startDate.plusDays(14L);
-
-            // 危险期
+        }else {
+            // 获取排卵日
+            LocalDate ovulation = one.getOvulation();
+            // 计算危险期
             List<LocalDate> dangerousPeriod = new ArrayList<>(14);
-            for (int i = 3; i >= 1; i--) {
-                dangerousPeriod.add(ovulationDay.plusDays(-i));
+            for (int i = 5; i >=0 ; i--) {
+                dangerousPeriod.add(ovulation.plusDays(-i));
             }
-            dangerousPeriod.add(ovulationDay);
-            for (int i = 1; i <= 5; i++) {
-                dangerousPeriod.add(ovulationDay.plusDays(i));
+            for (int i = 1; i <= 4; i++) {
+                dangerousPeriod.add(ovulation.plusDays(i));
             }
-            result.put("dangerousPeriod", dangerousPeriod);
+            result.put("dangerousPeriod",dangerousPeriod);
         }
         return result;
     }
@@ -365,7 +366,9 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 result.put("daysMax", auntAnalyzer.getDaysMax());
                 String[] dayCount = auntAnalyzer.getDayCount().split(",");
                 result.put("dayCount", dayCount);
-                result.put("nextDays", auntAnalyzer.getNextDays());
+                result.put("nextDayStr", auntAnalyzer.getNextDayStr());
+                result.put("nextOvulationDayStr",auntAnalyzer.getOvulationStr());
+
             } else {
                 result.put("message", auntAnalyzer.getMessage());
             }

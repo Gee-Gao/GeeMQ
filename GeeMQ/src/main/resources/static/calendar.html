@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>危险期日历</title>
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,minimal-ui" />
+		<link rel="stylesheet" type="text/css" href="css/reset.css" />
+		<link rel="stylesheet" type="text/css" href="css/calendar.css" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+
+		<style>
+			.act {
+				
+				margin-top: 85px;
+				margin-bottom: 20px;
+				text-align: center;
+			}
+
+			.act button {
+				margin-right: 30px;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<header class="mui-bar mui-bar-nav" style="padding-right: 15px;">
+			<button id='backToMain' class="mui-pull-left mui-btn-link"><i class="mui-icon mui-icon-back"></i></button>
+			<h1 class="mui-title">危险期日历</h1>	
+		</header>
+		
+		
+		
+		<div class="wrap">
+			<ul class="week-f">
+				<li>一</li>
+				<li>二</li>
+				<li>三</li>
+				<li>四</li>
+				<li>五</li>
+			
+				<li class="wk">六</li>
+				<li class="wk">日</li>
+			</ul>
+		
+			<div id="calendar"></div>
+		
+				
+				<div class="act">
+					<button type="button" class="mui-btn mui-btn-primary" id="prevMonth">上一月</button>
+					<button type="button" class="mui-btn mui-btn-primary" id="nextMonth">下一月</button>
+				</div>
+					
+			
+			
+		</div>
+	
+		
+
+		<script src='js/config.js'></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/calendar.js"></script>
+
+
+		<script>
+			var calendarIns = null;
+			(function($) {
+				$.init();
+				$.ready(function() {
+					calendarIns = new calendar.calendar({
+						count: 1,
+						selectDate: new Date(),
+						selectDateName: '',
+						minDate: null,
+						maxDate: null,
+						isShowHoliday: true,
+						isShowWeek: false,
+					});
+
+					calendarIns.afterSelectDate = function(e) {
+						console.log('after select date: ' + e);
+					};
+
+					document.getElementById('prevMonth').addEventListener('tap', function() {
+						calendarIns.prevMonth();
+					});
+
+					document.getElementById('nextMonth').addEventListener('tap', function() {
+						calendarIns.nextMonth();
+					});
+					
+					document.getElementById("backToMain").addEventListener("tap", function() {
+						$.openWindow({
+							url: 'index.html',
+							id: 'index',
+						});
+					})
+					$.oldBack = mui.back;
+					var backButtonPress = 0;
+					$.back = function(event) {
+						backButtonPress++;
+						if (backButtonPress > 1) {
+							plus.runtime.quit();
+						} else {
+							plus.nativeUI.toast('再按一次退出应用');
+						}
+						setTimeout(function() {
+							backButtonPress = 0;
+						}, 1000);
+						return false;
+					};
+					
+					
+				});
+			})(mui);
+		</script>
+
+	</body>
+</html>

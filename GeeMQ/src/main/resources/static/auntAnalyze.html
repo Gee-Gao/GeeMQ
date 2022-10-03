@@ -49,9 +49,9 @@
 					var userinfoJson = localStorage.getItem("userInfo");
 
 					var userinfo = JSON.parse(userinfoJson);
-					mui.ajax(serverAddr + "/aunt/calc/auntRecord", {
+					mui.ajax(serverAddr + "/aunt/calc/auntAnalyzer", {
 						data: {
-							"id": userinfo.id
+							"userId": userinfo.id
 						},
 						dataType: 'json', //服务器返回json格式数据
 						type: 'post', //HTTP请求类型
@@ -76,10 +76,8 @@
 										+'<li class="mui-table-view-cell">' + calcData.max +'</li>'
 										+'<li class="mui-table-view-cell">' + calcData.avg +'</li>'
 										+'<li class="mui-table-view-cell">' + calcData.daysMax +'</li>'
-										+'<li class="mui-table-view-cell">' + calcData.nextDays +'</li>'
-									
-									
-								
+										+'<li class="mui-table-view-cell">' + calcData.nextOvulationDayStr +'</li>'
+										+'<li class="mui-table-view-cell">' + calcData.nextDayStr +'</li>'
 							}
 							html += '</ul>'
 							doc.getElementById("content").innerHTML = html;
