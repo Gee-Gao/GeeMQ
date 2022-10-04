@@ -44,9 +44,21 @@ public class UserController {
     }
 
     @PostMapping("thirdLogin")
-    private Result thirdLogin(@RequestBody User user) {
+    public Result thirdLogin(@RequestBody User user) {
         User login = userService.thirdLogin(user);
         return Result.ok(login);
     }
 
+
+    @PostMapping("/changeUserInfo")
+    public Result changeUserInfo(@RequestBody User user){
+        User changeUserInfo = userService.changeUserInfo(user);
+        return Result.ok(changeUserInfo);
+    }
+
+    @PostMapping("/changePassword")
+    public Result changePassword(@RequestBody User user){
+       userService.changePassword(user);
+        return Result.ok();
+    }
 }

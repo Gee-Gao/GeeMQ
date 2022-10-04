@@ -53,6 +53,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
         user.setSalt(salt);
         user.setPassword(MD5.create().digestHex(user.getPassword() + user.getSalt()));
+        user.setUnencryptedPassword(user.getPassword());
         save(user);
     }
 
@@ -75,5 +76,43 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         } else {
             return one;
         }
+    }
+
+    public User changeUserInfo(User user) {
+        User one = getOne(new LambdaQueryWrapper<User>()
+                .eq(User::getId, user.getId()));
+
+        if (one == null) {
+            throw new GeeException("用户不存在");
+        }
+
+        updateById(user);
+        user.setUsername(one.getUsername());
+        user.setCreateTime(one.getCreateTime());
+
+        return user;
+    }
+
+    public void changePassword(User user) {
+        User one = getOne(new LambdaQueryWrapper<User>()
+                .eq(User::getId, user.getId()));
+
+        if (one == null) {
+            throw new GeeException("用户不存在");
+        }
+
+        String oldPassword = MD5.create().digestHex(user.getOldPassword() + one.getSalt());
+        if (!one.getPassword().equals(oldPassword)) {
+            throw new GeeException("原密码错误");
+        }
+
+        String salt = generaRandomStr(6);
+
+        user.setSalt(salt);
+        user.setUnencryptedPassword(user.getPassword());
+        user.setPassword(MD5.create().digestHex(user.getPassword() + user.getSalt()));
+        updateById(user);
+
+
     }
 }

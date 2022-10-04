@@ -171,9 +171,11 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
             auntAnalyzer = new AuntAnalyzer();
             appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
             auntAnalyzer.setUserId(userId);
+            auntAnalyzer.setMessage("");
             auntAnalyzerService.save(auntAnalyzer);
         }else {
             appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
+            auntAnalyzer.setMessage("");
             auntAnalyzerService.updateById(auntAnalyzer);
         }
 
@@ -331,6 +333,14 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         }else {
             // 获取排卵日
             LocalDate ovulation = one.getOvulation();
+
+            if (ovulation == null) {
+                ovulation = auntMapper.selectLastAunt(aunt.getUserId());
+                if(ovulation == null){
+                    result.put("message", "此功能需保存一次记录");
+                    return result;
+                }
+            }
             // 计算危险期
             List<LocalDate> dangerousPeriod = new ArrayList<>(14);
             for (int i = 5; i >=0 ; i--) {

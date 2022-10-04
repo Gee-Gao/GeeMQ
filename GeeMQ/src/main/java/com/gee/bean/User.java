@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -33,10 +34,15 @@ public class User {
     private String password;
 
     /**
-     * 新密码
+     * 原密码
      */
     @TableField(exist = false)
-    private String newPassword;
+    private String oldPassword;
+
+    /**
+     * 未加密密码
+     */
+    private String unencryptedPassword;
 
     /**
      * 盐值
@@ -54,9 +60,25 @@ public class User {
     private String authType;
 
     /**
+     * 生日
+     */
+    private String birthday;
+
+    /**
+     * 地址
+     */
+    private String address;
+
+    /**
+     * 手机号
+     */
+    private String phone;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy年MM月dd日")
     private LocalDateTime createTime;
 
     /**
