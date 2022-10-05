@@ -247,13 +247,13 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         if (list.size() > 8) {
             for (int i = list.size() - 8; i < list.size() - 1; i++) {
                 long daySubtract = getDaySubtract(list, i);
-                EchartsData echartsData = new EchartsData(list.get(i).format(dateTimeFormatter), new BigDecimal(daySubtract));
+                EchartsData echartsData = new EchartsData(list.get(i + 1).format(dateTimeFormatter), new BigDecimal(daySubtract));
                 daysTrendList.add(echartsData);
             }
         } else {
             for (int i = 0; i < list.size() - 1; i++) {
                 long daySubtract = getDaySubtract(list, i);
-                EchartsData echartsData = new EchartsData(list.get(i).format(dateTimeFormatter), new BigDecimal(daySubtract));
+                EchartsData echartsData = new EchartsData(list.get(i + 1).format(dateTimeFormatter), new BigDecimal(daySubtract));
                 daysTrendList.add(echartsData);
             }
         }
