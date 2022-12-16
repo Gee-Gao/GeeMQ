@@ -52,8 +52,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         String salt = generaRandomStr(6);
 
         user.setSalt(salt);
-        user.setPassword(MD5.create().digestHex(user.getPassword() + user.getSalt()));
         user.setUnencryptedPassword(user.getPassword());
+        user.setPassword(MD5.create().digestHex(user.getPassword() + user.getSalt()));
         save(user);
     }
 

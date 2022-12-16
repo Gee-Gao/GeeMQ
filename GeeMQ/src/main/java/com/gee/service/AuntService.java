@@ -166,7 +166,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
 
         BigDecimal avg = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
         LocalDate nextDay = list.get(list.size() - 1).plusDays(
-                new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.FLOOR).longValue());
+                new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP).longValue());
         if(auntAnalyzer==null){
             auntAnalyzer = new AuntAnalyzer();
             appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
