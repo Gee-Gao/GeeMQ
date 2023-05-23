@@ -43,6 +43,14 @@ public class UserController {
         return Result.ok();
     }
 
+    /**
+     * @description 第三方登录
+     *
+     * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:39
+     */
     @PostMapping("thirdLogin")
     public Result thirdLogin(@RequestBody User user) {
         User login = userService.thirdLogin(user);
@@ -50,12 +58,28 @@ public class UserController {
     }
 
 
+    /**
+     * @description 修改用户信息
+     *
+     * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:39
+     */
     @PostMapping("/changeUserInfo")
     public Result changeUserInfo(@RequestBody User user){
         User changeUserInfo = userService.changeUserInfo(user);
         return Result.ok(changeUserInfo);
     }
 
+    /**
+     * @description 修改密码
+     *
+     * @param user 用户
+     * @return Result
+     * @author Gee
+     * @createTime 2022/7/11 20:39
+     */
     @PostMapping("/changePassword")
     public Result changePassword(@RequestBody User user){
        userService.changePassword(user);

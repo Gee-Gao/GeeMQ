@@ -79,6 +79,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     public User changeUserInfo(User user) {
+        // 查询数据库中用户数据
         User one = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getId, user.getId()));
 
@@ -94,6 +95,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     public void changePassword(User user) {
+        // 查询数据库中用户数据
         User one = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getId, user.getId()));
 
@@ -101,18 +103,19 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             throw new GeeException("用户不存在");
         }
 
+        // 获取原密码并进行比对
         String oldPassword = MD5.create().digestHex(user.getOldPassword() + one.getSalt());
         if (!one.getPassword().equals(oldPassword)) {
             throw new GeeException("原密码错误");
         }
 
+        // 生成新的盐值
         String salt = generaRandomStr(6);
-
+        // 设置盐值和密码
         user.setSalt(salt);
         user.setUnencryptedPassword(user.getPassword());
         user.setPassword(MD5.create().digestHex(user.getPassword() + user.getSalt()));
+        // 更新用户信息
         updateById(user);
-
-
     }
 }
