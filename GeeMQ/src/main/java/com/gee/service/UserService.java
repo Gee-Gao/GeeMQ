@@ -118,4 +118,14 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         // 更新用户信息
         updateById(user);
     }
+
+    /**
+     * 用于测试登录密码
+     * @param args
+     */
+    public static void main(String[] args) {
+        String password = "123456";// 密码
+        String salt = "123456";// 盐值
+        System.out.println(MD5.create().digestHex(password + salt));
+    }
 }
