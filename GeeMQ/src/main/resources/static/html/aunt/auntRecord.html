@@ -2,74 +2,88 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <link rel="stylesheet" href="../../css/vant/vant.css">
         <link rel="shortcut icon" href="#"/>
         <meta name="viewport"
               content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
-
+        <style>
+            body {
+                background: #DCDFE6;
+            }
+        </style>
     </head>
     <body>
         <div id="app">
-            <el-page-header @back="goBack" content="&emsp;&emsp;&emsp;&emsp;姨妈记录"></el-page-header>
-            <el-table :data="tableData" style="width: 100%">
-                <el-table-column
-                        fixed
-                        prop="auntDateStr"
-                        label="姨妈日期"
-                        width="260">
-                </el-table-column>
-                <el-table-column label="操作">
-                    <template slot-scope="scope">
-                        <el-button
-                                size="mini"
-                                type="danger"
-                                @click="handleDelete(scope.$index, scope.row)">删除
-                        </el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-
+            <div>
+                <van-nav-bar title="姨妈记录" left-arrow @click-left="back"/>
+            </div>
+            <div style="margin-top: 15px">
+                <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="init">
+                    <van-cell v-for="item in list" :key="item" :title="item.auntDateStr">
+                        <template>
+                            <van-button type="danger" size="small" @click="deleteRecord(item)">删除</van-button>
+                        </template>
+                    </van-cell>
+                </van-list>
+            </div>
         </div>
     </body>
 
-    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+    <script src="../../js/vant/vant-vue.js"></script>
+    <script src="../../js/vant/vant.js"></script>
+    <script src="../../js/axios.js"></script>
     <script>
-        let elementUi;
+        let scope;
         new Vue({
             el: '#app',
             data() {
                 return {
-                    userInfo: {},
-                    tableData: [],
+                    list: [],
+                    loading: false,
+                    finished: false
                 }
             },
             created() {
-                elementUi = this;
+                scope = this;
                 // 获取当前登录用户信息
-                elementUi.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
-                // 初始化列表
-                elementUi.init();
+                scope.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
             },
             methods: {
-                goBack() {
-                    console.log("回去")
+                /// 返回
+                back() {
+                    location.href = "../../index.html"
                 },
+                // 初始化
                 init() {
-                    axios.post("/aunt/calc/list", {userId: elementUi.userInfo.id}).then(function (res) {
+                    axios.post("/aunt/calc/list", {userId: scope.userInfo.id}).then(function (res) {
                         if (res.data.code === 200) {
-                            elementUi.tableData = res.data.data;
+                            scope.list = res.data.data;
+                            scope.loading = false;
+                            scope.finished = true;
                         } else {
                             // 查询失败，弹出错误提示
-                            elementUi.$message({
-                                message: res.data.msg,
-                                type: 'error'
-                            });
+                            vant.Notify({type: 'danger', message: res.data.msg})
                         }
                     })
                 },
+                // 删除记录
+                deleteRecord(record) {
+                    vant.Dialog.confirm({
+                        message: '确认删除吗？'
+                    }).then(function () {
+                            axios.post("/aunt/calc/delete", {id: record.id}).then(function (res) {
+                                if (res.data.code === 200) {
+                                    scope.init();
+                                } else {
+                                    // 查询失败，弹出错误提示
+                                    vant.Notify({type: 'danger', message: res.data.msg})
+                                }
+                            })
+                        }
+                    ).catch(() => {
+                        console.log("取消")
+                    });
+                }
             }
         })
     </script>
