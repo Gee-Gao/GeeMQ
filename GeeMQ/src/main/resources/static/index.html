@@ -2,50 +2,28 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="css/element-ui.css">
-
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.2/lib/index.css">
         <link rel="shortcut icon" href="#"/>
         <meta name="viewport"
               content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
         <style>
-            body {
-                background: #DCDFE6;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
         </style>
     </head>
     <body>
         <div id="app">
-            <el-container>
-                <el-main>
-
-                </el-main>
-
-                <el-footer>
-                    <el-menu
-                            :default-active="activeIndex"
-                            mode="horizontal"
-                            text-color="#000000"
-                            active-text-color="#ffd04b">
-                        <el-menu-item style="width: 50%" index="1"><i class="el-icon-menu"></i>首页</el-menu-item>
-                        <el-menu-item style="width: 50%" index="2"><i class="el-icon-s-custom"></i>我的</el-menu-item>
-                    </el-menu>
-                </el-footer>
-            </el-container>
+            <van-nav-bar title="标题"/>
         </div>
     </body>
 
-    <script src="js/vue.js"></script>
-    <script src="js/element-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vant@2.2/lib/vant.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
         new Vue({
             el: '#app',
             data() {
-                return {
-                    activeIndex: '1',
-                }
+
             },
             created() {
 
