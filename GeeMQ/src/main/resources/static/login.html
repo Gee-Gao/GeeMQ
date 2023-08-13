@@ -71,7 +71,7 @@
                             // 保存登录用户信息，用于下次登录
                             sessionStorage.setItem("loginUser", JSON.stringify(elementUi.loginForm))
                             sessionStorage.setItem("userInfo", JSON.stringify(res.data.data))
-                            location.href = "html/aunt/auntRecord.html"
+                            location.href = "index.html"
                         } else {
                             // 登录失败，删除登录用户信息
                             sessionStorage.removeItem("loginUser");
