@@ -44,14 +44,14 @@
                 return {
                     url: 'img/avator.jpg',
                     loginForm: {
-                        username: '12345',
-                        password: '123456',
+                        username: '',
+                        password: '',
                     }
                 }
             },
             created() {
                 elementUi = this
-                var loginUser = JSON.parse(sessionStorage.getItem("loginUser"));
+                var loginUser = JSON.parse(localStorage.getItem("loginUser"));
                 // 如果存在用户信息，自动登录
                 if (loginUser) {
                     elementUi.loginForm = loginUser;
@@ -69,12 +69,12 @@
                     axios.post("/user/calc/login", elementUi.loginForm).then(function (res) {
                         if (res.data.code == '200') {
                             // 保存登录用户信息，用于下次登录
-                            sessionStorage.setItem("loginUser", JSON.stringify(elementUi.loginForm))
-                            sessionStorage.setItem("userInfo", JSON.stringify(res.data.data))
+                            localStorage.setItem("loginUser", JSON.stringify(elementUi.loginForm))
+                            localStorage.setItem("userInfo", JSON.stringify(res.data.data))
                             location.href = "index.html"
                         } else {
                             // 登录失败，删除登录用户信息
-                            sessionStorage.removeItem("loginUser");
+                            localStorage.removeItem("loginUser");
                             elementUi.$message({
                                 message: res.data.msg,
                                 type: 'error'
