@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/vant/vant.css">
+        <link rel="shortcut icon" href="#"/>
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+        <style>
+            body {
+                background: #DCDFE6;
+            }
+
+            .row {
+                display: block;
+                background: #ffffff;
+                height: 40px;
+                line-height: 40px;
+                padding: 0 20px;
+                position: relative;
+                border-bottom: 1px solid #DCDFE6;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <van-nav-bar title="姨妈分析" left-arrow @click-left="back"/>
+            </div>
+            <div style="margin-top: 15px">
+                <van-col span="24" v-if="auntAnalyzer.message">
+                    <div class="row">{{auntAnalyzer.message}}</div>
+                </van-col>
+
+
+				<van-col span="24" v-if="!auntAnalyzer.message">
+					<div class="row">{{auntAnalyzer.min}}</div>
+					<div class="row">{{auntAnalyzer.max}}</div>
+					<div class="row">{{auntAnalyzer.avg}}</div>
+					<div class="row">{{auntAnalyzer.daysMax}}</div>
+					<div class="row">{{auntAnalyzer.nextOvulationDayStr}}</div>
+					<div class="row">{{auntAnalyzer.nextDayStr}}</div>
+				</van-col>
+
+            </div>
+        </div>
+    </body>
+
+    <script src="../../js/vant/vant-vue.js"></script>
+    <script src="../../js/vant/vant.js"></script>
+    <script src="../../js/axios.js"></script>
+    <script>
+        let scope;
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    auntAnalyzer: {}
+                }
+            },
+            created() {
+                scope = this;
+                // 获取当前登录用户信息
+                scope.userInfo = JSON.parse(localStorage.getItem("userInfo"));
+                // 初始化数据
+                scope.init();
+            },
+            methods: {
+                /// 返回
+                back() {
+                    location.href = "../../index.html"
+                },
+                // 初始化
+                init() {
+                    axios.post("/aunt/calc/auntAnalyzer", {userId: scope.userInfo.id}).then(function (res) {
+                        if (res.data.code === 200) {
+                            scope.auntAnalyzer = res.data.data;
+                        } else {
+                            // 查询失败，弹出错误提示
+                            vant.Notify({type: 'danger', message: res.data.msg, duration: 1000})
+                        }
+                    })
+                },
+            }
+        })
+    </script>
+</html>
