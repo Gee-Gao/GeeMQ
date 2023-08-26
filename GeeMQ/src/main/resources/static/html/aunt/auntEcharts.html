@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/vant/vant.css">
+        <link rel="shortcut icon" href="#"/>
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+        <style>
+            body {
+                background: #DCDFE6;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <van-nav-bar title="图表分析" left-arrow @click-left="back"/>
+            </div>
+            <div>
+                <div id="daysPercent" style="width: 100vw;height:45vh;"></div>
+                <div id="daysTrend" style="width: 100vw;height:45vh;"></div>
+            </div>
+        </div>
+        <script src="../../js/vant/vant-vue.js"></script>
+        <script src="../../js/vant/vant.js"></script>
+        <script src="../../js/echarts.js"></script>
+        <script src="../../js/axios.js"></script>
+        <script type="text/javascript">
+            addEventListener(
+                document,
+                function (e) {
+                    e.preventDefault(); // 完全阻止滚动
+                },
+                false
+            );
+
+            new Vue({
+                el: '#app',
+                data() {
+                },
+                methods: {
+                    /// 返回
+                    back() {
+                        location.href = "../../index.html"
+                    },
+                }
+            })
+
+
+            let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+            axios.post("/aunt/calc/echarts", {"userId": userInfo.id}).then(function (res) {
+
+                if (res.data.code === 200) {
+                    var calcData = res.data.data;
+                    // 天数占比
+                    let daysPercent = echarts.init(document.getElementById('daysPercent'));
+                    let daysPercentOption = {
+                        title: {
+                            text: '天数占比',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{b}' // 当前图例名
+                        },
+                        series: [
+                            {
+                                name: '天数占比',
+                                type: 'pie',
+                                radius: '50%',
+                                data: calcData.daysPercentList,
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)',
+                                    },
+                                },
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    },
+                                    normal: {
+                                        label: {
+                                            show: true,
+                                        },
+                                        labelLine: {
+                                            show: true
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                    daysPercent.setOption(daysPercentOption);
+
+                    // 天数趋势
+                    let daysTrend = echarts.init(document.getElementById('daysTrend'));
+                    let XDaysTrend = [];
+                    let yDaysTrend = [];
+                    let daysTrendList = calcData.daysTrendList;
+
+                    for (let i = 0; i < daysTrendList.length; i++) {
+                        XDaysTrend.push(daysTrendList[i].name);
+                        yDaysTrend.push(daysTrendList[i].value)
+                    }
+
+                    let daysTrendOption = {
+                        title: {
+                            text: '半年内趋势',
+                            left: 'center'
+                        },
+                        grid: {
+                            x: 35,
+                            x2: 10,
+                            y: 50,
+                            y2: 100
+                        },
+                        calculable: true,
+                        xAxis: [{
+                            axisLabel: {
+                                show: true,
+                                textStyle: {
+                                    color: "#000000" //X轴文字颜色
+                                },
+                                interval: 0,
+                                formatter: function(value) {
+                                    var rowMAx = 5; // 控制一行多少字
+                                    var overValue = ''
+                                    for (let i = 0; i < value.length; i++) {
+                                        if ((i % rowMAx == 0) && (i != 0)) {
+                                            overValue += '\n'
+                                            overValue += value[i]
+                                        } else {
+                                            overValue += value[i]
+                                        }
+                                    }
+                                    return overValue
+                                }
+                            },
+                            type: 'category',
+                            data: XDaysTrend
+                        }],
+                        yAxis: [{
+                            type: 'value',
+                            splitArea: {
+                                show: true
+                            }
+                        }],
+                        series: [{
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        show: true
+                                    }
+                                }
+                            },
+                            type: "line",
+                            data: yDaysTrend
+                        }]
+                    }
+                    daysTrend.setOption(daysTrendOption)
+                } else {
+                    // 查询失败，弹出错误提示
+                    vant.Notify({type: 'danger', message: res.data.msg, duration: 1000})
+                }
+            })
+        </script>
+    </body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/vant/vant.css">
+        <link rel="shortcut icon" href="#"/>
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+        <style>
+            body {
+                background: #DCDFE6;
+            }
+
+            .row {
+                display: block;
+                background: #ffffff;
+                height: 40px;
+                line-height: 40px;
+                padding: 0 20px;
+                position: relative;
+                border-bottom: 1px solid #DCDFE6;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <van-nav-bar title="姨妈间隔" left-arrow @click-left="back"/>
+            </div>
+            <div style="margin-top: 15px">
+                <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="init">
+                    <van-cell v-for="(item,index)  in auntInterval" :key="index">
+                        <template>
+                            <span>{{item}}</span>
+                            <van-button v-if="item !=='此功能需保存两次及以上记录'"  style="float: right" type="danger" size="small" @click="deleteRecord(item)">删除</van-button>
+                        </template>
+                    </van-cell>
+                </van-list>
+            </div>
+        </div>
+    </body>
+
+    <script src="../../js/vant/vant-vue.js"></script>
+    <script src="../../js/vant/vant.js"></script>
+    <script src="../../js/axios.js"></script>
+    <script>
+        let scope;
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    auntInterval: [],
+                    loading: false,
+                    finished: false
+                }
+            },
+            created() {
+                scope = this;
+                // 获取当前登录用户信息
+                scope.userInfo = JSON.parse(localStorage.getItem("userInfo"));
+            },
+            methods: {
+                /// 返回
+                back() {
+                    location.href = "../../index.html"
+                },
+                // 初始化
+                init() {
+                    axios.post("/aunt/calc/auntInterval", {userId: scope.userInfo.id}).then(function (res) {
+                        if (res.data.code === 200) {
+                            scope.auntInterval = res.data.data;
+                            scope.loading = false;
+                            scope.finished = true;
+                        } else {
+                            // 查询失败，弹出错误提示
+                            vant.Notify({type: 'danger', message: res.data.msg})
+                        }
+                    })
+                },
+            }
+        })
+    </script>
+</html>
