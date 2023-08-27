@@ -46,7 +46,7 @@
             created() {
                 scope = this;
                 // 获取当前登录用户信息
-                scope.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+                scope.userInfo = JSON.parse(localStorage.getItem("userInfo"));
             },
             methods: {
                 /// 返回

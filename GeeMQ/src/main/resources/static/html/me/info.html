@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/vant/vant.css">
+        <link rel="shortcut icon" href="#"/>
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+        <style>
+            body {
+                background: #DCDFE6;
+            }
+
+            .row {
+                display: block;
+                background: #ffffff;
+                height: 40px;
+                line-height: 40px;
+                padding: 0 20px;
+                position: relative;
+                border-bottom: 1px solid #DCDFE6;
+            }
+
+            .right {
+                position: absolute;
+                right: 5vw;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <van-nav-bar title="我的信息" left-arrow @click-left="back"/>
+            </div>
+            <div style="margin-top: 15px">
+                <van-col span="24">
+                    <div class="row">
+                        <span>账号</span>
+                        <i class="right">{{userInfo.username}}</i>
+                    </div>
+                </van-col>
+
+                <van-col span="24">
+                    <div class="row">
+                        <span>姓名</span>
+                        <i class="right">{{userInfo.name}}</i>
+                    </div>
+                </van-col>
+
+                <van-col span="24">
+                    <div class="row">
+                        <span>手机</span>
+                        <i class="right">{{userInfo.phone  == null? '暂未填写':userInfo.phone}}</i>
+                    </div>
+                </van-col>
+
+                <van-col span="24">
+                    <div class="row">
+                        <span>地址</span>
+                        <i class="right">{{userInfo.address  == null? '暂未填写':userInfo.address}}</i>
+                    </div>
+                </van-col>
+
+                <van-col span="24">
+                    <div class="row">
+                        <span>生日</span>
+                        <i class="right">{{userInfo.birthday == null? '暂未填写':userInfo.birthday}}</i>
+                    </div>
+                </van-col>
+
+                <van-col span="24">
+                    <div class="row">
+                        <span>注册时间</span>
+                        <i class="right">{{userInfo.createTime}}</i>
+                    </div>
+                </van-col>
+            </div>
+        </div>
+    </body>
+
+    <script src="../../js/vant/vant-vue.js"></script>
+    <script src="../../js/vant/vant.js"></script>
+    <script src="../../js/axios.js"></script>
+    <script>
+        let scope;
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    auntAnalyzer: {}
+                }
+            },
+            created() {
+                scope = this;
+                // 获取当前登录用户信息
+                scope.userInfo = JSON.parse(localStorage.getItem("userInfo"));
+            },
+            methods: {
+                /// 返回
+                back() {
+                    location.href = "../../index.html"
+                },
+            }
+        })
+    </script>
+</html>
