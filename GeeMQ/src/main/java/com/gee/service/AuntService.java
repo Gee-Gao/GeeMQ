@@ -229,23 +229,28 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         BigDecimal hundred = new BigDecimal(100);
         countWithDays.forEach((day, count) -> {
             BigDecimal percent = new BigDecimal(count).divide(new BigDecimal(list.size() - 1), 4, RoundingMode.HALF_UP).multiply(hundred);
-            EchartsData echartsData = new EchartsData(day + "天", percent);
+            EchartsData echartsData = new EchartsData(day + "天:\n"+ percent.setScale(2,RoundingMode.HALF_UP)+"%" , percent);
             daysPercentList.add(echartsData);
         });
+
+        // 计算最后一次的百分比
         BigDecimal lastPercent = new BigDecimal(100);
         for (int i = 0; i < daysPercentList.size() - 1; i++) {
             BigDecimal percent = daysPercentList.get(i).getValue();
             lastPercent = lastPercent.subtract(percent);
         }
         EchartsData echartsDataLast = daysPercentList.get(daysPercentList.size() - 1);
+        String[] split = echartsDataLast.getName().split("\n");
+        echartsDataLast.setName(split[0] +'\n'+lastPercent.setScale(2,RoundingMode.HALF_UP)+"%");
         echartsDataLast.setValue(lastPercent);
+
         result.put("daysPercentList", daysPercentList);
 
-        // 天数趋势
+        // 半年内天数趋势
         List<EchartsData> daysTrendList = new ArrayList<>();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月");
-        if (list.size() > 8) {
-            for (int i = list.size() - 8; i < list.size() - 1; i++) {
+        if (list.size() > 7) {
+            for (int i = list.size() - 7; i < list.size() - 1; i++) {
                 long daySubtract = getDaySubtract(list, i);
                 EchartsData echartsData = new EchartsData(list.get(i + 1).format(dateTimeFormatter), new BigDecimal(daySubtract));
                 daysTrendList.add(echartsData);
