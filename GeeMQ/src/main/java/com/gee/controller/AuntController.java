@@ -18,15 +18,16 @@ public class AuntController {
 
     @PostMapping("/list")
     public Result queryAuntList(@RequestBody Aunt aunt) {
-        List<Aunt> list =  auntService.queryAuntList(aunt);
+        List<Aunt> list = auntService.queryAuntList(aunt);
         return Result.ok(list);
     }
 
 
     @PostMapping("/save")
     public Result saveAunt(@RequestBody Aunt aunt) {
-        auntService.saveAunt(aunt);
-        return Result.ok();
+        // 保存并获取距离当前时间最近的一次姨妈
+        Aunt lastAunt = auntService.saveAunt(aunt);
+        return Result.ok(lastAunt);
     }
 
     @PostMapping("/auntInterval")
@@ -55,5 +56,11 @@ public class AuntController {
     @PostMapping("/calendar")
     public Result calendar(@RequestBody Aunt aunt) {
         return Result.ok(auntService.calendar(aunt));
+    }
+
+
+    @PostMapping("/getLastAunt")
+    public Result getLastAunt(@RequestBody Aunt aunt) {
+        return Result.ok(auntService.getLastAunt(aunt));
     }
 }

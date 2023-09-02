@@ -37,7 +37,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
      * @author Gee
      * @createTime 2022/9/18 1:31
      */
-    public void saveAunt(Aunt aunt) {
+    public Aunt saveAunt(Aunt aunt) {
         if (aunt.getAuntDate() == null) {
             throw new GeeException("未选择姨妈日期");
         }
@@ -53,6 +53,9 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         save(aunt);
         List<LocalDate> auntLocalDate = getAuntLocalDate(aunt);
         auntAnalyzer(auntLocalDate,aunt.getUserId());
+
+        // 获取距离当前日期最近的一次姨妈
+        return getLastAunt(aunt);
     }
 
     /**
@@ -395,5 +398,21 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         removeById(aunt);
         List<LocalDate> auntLocalDate = getAuntLocalDate(aunt);
         auntAnalyzer(auntLocalDate,aunt.getUserId());
+    }
+
+    public Aunt getLastAunt(Aunt aunt) {
+        Aunt one = getOne(new LambdaQueryWrapper<Aunt>()
+                .eq(Aunt::getUserId, aunt.getUserId())
+                .orderByDesc(Aunt::getAuntDate)
+                .last("limit 1")
+        );
+
+        if(one != null){
+            Map<String, Object> result = new HashMap<>();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            one.setLastAunt(simpleDateFormat.format(one.getAuntDate()));
+            return one;
+        }
+        return null;
     }
 }

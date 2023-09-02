@@ -38,6 +38,12 @@ public class Aunt {
     private String auntDateStr;
 
     /**
+     * 上次姨妈日期
+     */
+    @TableField(exist = false)
+    private String lastAunt;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
