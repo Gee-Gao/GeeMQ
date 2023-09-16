@@ -379,7 +379,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         } else {
             if (StrUtil.isBlank(auntAnalyzer.getMessage())) {
                 result.put("min", auntAnalyzer.getMinDay());
-                result.put("max", auntAnalyzer.getDaysMax());
+                result.put("max", auntAnalyzer.getMaxDay());
                 result.put("avg", auntAnalyzer.getAvgDay());
                 result.put("daysMax", auntAnalyzer.getDaysMax());
                 String[] dayCount = auntAnalyzer.getDayCount().split(",");
