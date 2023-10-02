@@ -67,7 +67,7 @@ public class UserController {
      * @createTime 2022/7/11 20:39
      */
     @PostMapping("/changeUserInfo")
-    public Result changeUserInfo(@RequestBody User user){
+    public Result changeUserInfo(@RequestBody User user) {
         User changeUserInfo = userService.changeUserInfo(user);
         return Result.ok(changeUserInfo);
     }
@@ -81,8 +81,8 @@ public class UserController {
      * @createTime 2022/7/11 20:39
      */
     @PostMapping("/changePassword")
-    public Result changePassword(@RequestBody User user){
-       userService.changePassword(user);
+    public Result changePassword(@RequestBody User user) {
+        userService.changePassword(user);
         return Result.ok();
     }
 }
