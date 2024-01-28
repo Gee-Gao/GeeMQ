@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../../css/vant/vant.css">
+        <link rel="shortcut icon" href="#"/>
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+        <style>
+            body {
+                background: #DCDFE6;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <van-nav-bar title="危险期日历" left-arrow @click-left="back"/>
+            </div>
+            <div style="margin-top: 15px">
+                <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="init">
+                    <van-cell v-for="item in calendar" :key="item" :title="item.dangerousDate">
+                        <template>
+                            <van-button v-if="item.dangerousType == '1'" type="danger" size="small">{{item.dangerousTitle}}</van-button>
+                            <van-button v-if="item.dangerousType == '2'" type="warning" size="small">{{item.dangerousTitle}}</van-button>
+                        </template>
+                    </van-cell>
+                </van-list>
+            </div>
+        </div>
+        <script src="../../js/vant/vant-vue.js"></script>
+        <script src="../../js/vant/vant.js"></script>
+        <script src="../../js/axios.js"></script>
+        <script type="text/javascript">
+            new Vue({
+                el: '#app',
+                data() {
+                    return {
+                        calendar :[], // 危险期日历数组
+                        loading: false,
+                        finished: false,
+                    }
+                },
+                created() {
+                    scope = this;
+                    // 获取当前登录用户信息
+                    scope.userInfo = JSON.parse(localStorage.getItem("userInfo"));
+                    scope.init();
+                },
+                methods: {
+                    /// 返回
+                    back() {
+                        location.href = "../../index.html"
+                    },
+                    init(){
+                        axios.post("/aunt/calc/calendar", {userId: scope.userInfo.id}).then(function (res) {
+                            if (res.data.code === 200) {
+                                scope.calendar = res.data.data.dangerousPeriodList;
+                                scope.loading = false;
+                                scope.finished = true;
+                            } else {
+                                // 查询失败，弹出错误提示
+                                vant.Notify({type: 'danger', message: res.data.msg, duration: 1000})
+                            }
+                        })
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>

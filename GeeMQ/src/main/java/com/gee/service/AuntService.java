@@ -33,7 +33,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 保存姨妈
      *
-	 * @param aunt 姨妈参数
+     * @param aunt 姨妈参数
      * @author Gee
      * @createTime 2022/9/18 1:31
      */
@@ -52,7 +52,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
 
         save(aunt);
         List<LocalDate> auntLocalDate = getAuntLocalDate(aunt);
-        auntAnalyzer(auntLocalDate,aunt.getUserId());
+        auntAnalyzer(auntLocalDate, aunt.getUserId());
 
         // 获取距离当前日期最近的一次姨妈
         return getLastAunt(aunt);
@@ -61,7 +61,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 获取LocalDate类型的姨妈日期
      *
-	 * @param aunt 姨妈参数
+     * @param aunt 姨妈参数
      * @return List<LocalDate> 姨妈日期
      * @author Gee
      * @createTime 2022/9/18 1:32
@@ -79,7 +79,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 获取姨妈间隔
      *
-	 * @param list 姨妈日期列表
+     * @param list 姨妈日期列表
      * @return List<String> 姨妈间隔
      * @author Gee
      * @createTime 2022/9/18 1:33
@@ -105,7 +105,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 姨妈分析
      *
-	 * @param list 姨妈日期列表
+     * @param list 姨妈日期列表
      * @param userId 登录用户id
      * @author Gee
      * @createTime 2022/9/18 1:35
@@ -115,7 +115,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 .eq(AuntAnalyzer::getUserId, userId));
 
         if (list.size() < 2) {
-            if(auntAnalyzer ==null) {
+            if (auntAnalyzer == null) {
                 auntAnalyzer = new AuntAnalyzer();
                 auntAnalyzer.setUserId(userId);
                 auntAnalyzer.setMessage("此功能需保存两次及以上记录");
@@ -170,13 +170,13 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         BigDecimal avg = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
         LocalDate nextDay = list.get(list.size() - 1).plusDays(
                 new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP).longValue());
-        if(auntAnalyzer==null){
+        if (auntAnalyzer == null) {
             auntAnalyzer = new AuntAnalyzer();
             appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
             auntAnalyzer.setUserId(userId);
             auntAnalyzer.setMessage("");
             auntAnalyzerService.save(auntAnalyzer);
-        }else {
+        } else {
             appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
             auntAnalyzer.setMessage("");
             auntAnalyzerService.updateById(auntAnalyzer);
@@ -188,13 +188,13 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 组装姨妈分析对象
      *
-	 * @param auntAnalyzer 待保存的姨妈分析对象
-	 * @param min 最小间隔
-	 * @param max 最大间隔
-	 * @param daysMax 出现次数最多的天数
-	 * @param dayCount 天数出现次数
-	 * @param avg 平均间隔
-	 * @param nextDay 下一次姨妈日期
+     * @param auntAnalyzer 待保存的姨妈分析对象
+     * @param min 最小间隔
+     * @param max 最大间隔
+     * @param daysMax 出现次数最多的天数
+     * @param dayCount 天数出现次数
+     * @param avg 平均间隔
+     * @param nextDay 下一次姨妈日期
      * @author Gee
      * @createTime 2022/9/25 15:46
      */
@@ -208,7 +208,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         auntAnalyzer.setNextDayStr("预计下次时间为" + nextDay.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
         LocalDate ovulation = nextDay.plusDays(-14L);
         auntAnalyzer.setOvulation(ovulation);
-        auntAnalyzer.setOvulationStr("预计下次排卵日为"+ovulation.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
+        auntAnalyzer.setOvulationStr("预计下次排卵日为" + ovulation.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")));
     }
 
 
@@ -216,7 +216,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
      * @description 图表分析
      *
      * @param list 姨妈日期列表
-     * @return Map< String,Object> 图表分析结果
+     * @return Map<String, Object> 图表分析结果
      * @author Gee
      * @createTime 2022/9/18 1:35
      */
@@ -232,7 +232,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         BigDecimal hundred = new BigDecimal(100);
         countWithDays.forEach((day, count) -> {
             BigDecimal percent = new BigDecimal(count).divide(new BigDecimal(list.size() - 1), 4, RoundingMode.HALF_UP).multiply(hundred);
-            EchartsData echartsData = new EchartsData(day + "天:\n"+ percent.setScale(2,RoundingMode.HALF_UP)+"%" , percent);
+            EchartsData echartsData = new EchartsData(day + "天:\n" + percent.setScale(2, RoundingMode.HALF_UP) + "%", percent);
             daysPercentList.add(echartsData);
         });
 
@@ -244,7 +244,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         }
         EchartsData echartsDataLast = daysPercentList.get(daysPercentList.size() - 1);
         String[] split = echartsDataLast.getName().split("\n");
-        echartsDataLast.setName(split[0] +'\n'+lastPercent.setScale(2,RoundingMode.HALF_UP)+"%");
+        echartsDataLast.setName(split[0] + '\n' + lastPercent.setScale(2, RoundingMode.HALF_UP) + "%");
         echartsDataLast.setValue(lastPercent);
 
         result.put("daysPercentList", daysPercentList);
@@ -310,7 +310,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 查询姨妈列表
      *
-	 * @param aunt 姨妈参数
+     * @param aunt 姨妈参数
      * @return List<Aunt> 姨妈列表
      * @author Gee
      * @createTime 2022/9/18 1:38
@@ -336,28 +336,43 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         AuntAnalyzer one = auntAnalyzerService.getOne(new LambdaQueryWrapper<AuntAnalyzer>()
                 .eq(AuntAnalyzer::getUserId, aunt.getUserId()));
         Map<String, Object> result = new HashMap<>(2);
-        if(one == null){
+        if (one == null) {
             result.put("message", "此功能需保存一次记录");
-        }else {
+        } else {
             // 获取排卵日
             LocalDate ovulation = one.getOvulation();
 
             if (ovulation == null) {
                 ovulation = auntMapper.selectLastAunt(aunt.getUserId());
-                if(ovulation == null){
+                if (ovulation == null) {
                     result.put("message", "此功能需保存一次记录");
                     return result;
                 }
             }
             // 计算危险期
-            List<LocalDate> dangerousPeriod = new ArrayList<>(14);
-            for (int i = 5; i >=0 ; i--) {
-                dangerousPeriod.add(ovulation.plusDays(-i));
+            List<Map<String, Object>> dangerousPeriodList = new ArrayList<>(10);
+            for (int i = 5; i >= 1; i--) {
+                Map<String, Object> dangerousPeriod = new HashMap<>(8);
+                dangerousPeriod.put("dangerousDate", ovulation.plusDays(-i));
+                dangerousPeriod.put("dangerousType", "2");
+                dangerousPeriod.put("dangerousTitle", "危险日");
+                dangerousPeriodList.add(dangerousPeriod);
             }
+
+            Map<String, Object> ovulationPeriod = new HashMap<>(8);
+            ovulationPeriod.put("dangerousDate", ovulation);
+            ovulationPeriod.put("dangerousType", "1");
+            ovulationPeriod.put("dangerousTitle", "排卵日");
+            dangerousPeriodList.add(ovulationPeriod);
+
             for (int i = 1; i <= 4; i++) {
-                dangerousPeriod.add(ovulation.plusDays(i));
+                Map<String, Object> dangerousPeriod = new HashMap<>(8);
+                dangerousPeriod.put("dangerousDate", ovulation.plusDays(i));
+                dangerousPeriod.put("dangerousType", "2");
+                dangerousPeriod.put("dangerousTitle", "危险日");
+                dangerousPeriodList.add(dangerousPeriod);
             }
-            result.put("dangerousPeriod",dangerousPeriod);
+            result.put("dangerousPeriodList", dangerousPeriodList);
         }
         return result;
     }
@@ -365,7 +380,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     /**
      * @description 姨妈分析
      *
-	 * @param aunt 姨妈参数
+     * @param aunt 姨妈参数
      * @return Map<String, Object>
      * @author Gee
      * @createTime 2022/9/18 16:59
@@ -385,7 +400,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 String[] dayCount = auntAnalyzer.getDayCount().split(",");
                 result.put("dayCount", dayCount);
                 result.put("nextDayStr", auntAnalyzer.getNextDayStr());
-                result.put("nextOvulationDayStr",auntAnalyzer.getOvulationStr());
+                result.put("nextOvulationDayStr", auntAnalyzer.getOvulationStr());
 
             } else {
                 result.put("message", auntAnalyzer.getMessage());
@@ -397,7 +412,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
     public void deleteAunt(Aunt aunt) {
         removeById(aunt);
         List<LocalDate> auntLocalDate = getAuntLocalDate(aunt);
-        auntAnalyzer(auntLocalDate,aunt.getUserId());
+        auntAnalyzer(auntLocalDate, aunt.getUserId());
     }
 
     public Aunt getLastAunt(Aunt aunt) {
@@ -407,7 +422,7 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 .last("limit 1")
         );
 
-        if(one != null){
+        if (one != null) {
             Map<String, Object> result = new HashMap<>();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             one.setLastAunt(simpleDateFormat.format(one.getAuntDate()));
