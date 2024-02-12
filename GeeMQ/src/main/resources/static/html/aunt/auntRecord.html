@@ -40,7 +40,7 @@
                 return {
                     list: [],
                     loading: false,
-                    finished: true
+                    finished: false
                 }
             },
             created() {
@@ -55,8 +55,6 @@
                 },
                 // 初始化
                 init() {
-                    scope.loading = true;
-                    scope.finished = false;
                     axios.post("/aunt/calc/list", {userId: scope.userInfo.id}).then(function (res) {
                         if (res.data.code === 200) {
                             scope.list = res.data.data;
