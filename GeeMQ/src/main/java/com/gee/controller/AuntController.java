@@ -63,4 +63,9 @@ public class AuntController {
     public Result getLastAunt(@RequestBody Aunt aunt) {
         return Result.ok(auntService.getLastAunt(aunt));
     }
+
+    @PostMapping("/auntFixMonth")
+    public Result everyMonth(@RequestBody Aunt aunt) {
+        return Result.ok(auntService.auntFixMonth(aunt));
+    }
 }

@@ -72,7 +72,14 @@
 
                     <van-col span="24" @click="changeIndex(tapIndex,6)">
                         <div class="row">
-                            <span>危险期日历</span>
+                            <span>危险日历</span>
+                            <i class="el-icon-arrow-right icon"></i>
+                        </div>
+                    </van-col>
+
+                    <van-col span="24" @click="changeIndex(tapIndex,7)">
+                        <div class="row">
+                            <span>我的某月</span>
                             <i class="el-icon-arrow-right icon"></i>
                         </div>
                     </van-col>
@@ -161,6 +168,9 @@
                                 break;
                             case 6:
                                 location.href = "html/aunt/auntCalendar.html";
+                                break;
+                            case 7:
+                                location.href = "html/aunt/auntFixMonth.html";
                                 break;
                             default:
                                 break;

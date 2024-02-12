@@ -25,14 +25,33 @@
     <body>
         <div id="app">
             <div>
-                <van-nav-bar title="姨妈间隔" left-arrow @click-left="back"/>
+                <van-nav-bar title="我的某月" left-arrow @click-left="back"/>
             </div>
+
+            <van-cell-group>
+
+                <van-field
+                        readonly
+                        clickable
+                        label="时间"
+                        :value="value"
+                        placeholder="选择时间"
+                        @click="showPicker = true"
+                />
+            </van-cell-group>
+
+            <van-popup v-model="showPicker" position="bottom">
+                <van-picker
+                        show-toolbar
+                        :columns="columns"
+                        @cancel="showPicker = false"
+                        @confirm="confirm"
+                />
+            </van-popup>
+
             <div style="margin-top: 15px">
-                <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="init">
-                    <van-cell v-for="(item,index)  in auntInterval" :key="index">
-                        <template>
-                            <span>{{item}}</span>
-                        </template>
+                <van-list v-model="loading" :finished="finished" finished-text="没有更多了">
+                    <van-cell v-for="item in list" :key="item" :title="item">
                     </van-cell>
                 </van-list>
             </div>
@@ -48,7 +67,13 @@
             el: '#app',
             data() {
                 return {
-                    auntInterval: [],
+                    columns: ['1月', '2月', '3月', '4月',
+                        '5月', '6月', '7月', '8月',
+                        '9月', '10月', '11月', '12月'],
+                    showPicker: false,// 弹出层展示条件
+                    list: [],
+                    value: '',
+                    chooseValue: '',
                     loading: false,
                     finished: false
                 }
@@ -63,18 +88,32 @@
                 back() {
                     location.href = "../../index.html"
                 },
+
                 // 初始化
                 init() {
-                    axios.post("/aunt/calc/auntInterval", {userId: scope.userInfo.id}).then(function (res) {
+                    axios.post("/aunt/calc/auntFixMonth", {
+                        userId: scope.userInfo.id,
+                        fixMonth: scope.chooseValue,
+                    }).then(function (res) {
                         if (res.data.code === 200) {
-                            scope.auntInterval = res.data.data;
+                            scope.list = res.data.data;
                             scope.loading = false;
                             scope.finished = true;
                         } else {
                             // 查询失败，弹出错误提示
-                            vant.Notify({type: 'danger', message: res.data.msg})
+                            vant.Notify({type: 'danger', message: res.data.msg, duration: 1000})
                         }
                     })
+                },
+                confirm(value) {
+                    scope.showPicker = false;
+                    scope.value = value;
+                    if (value.length < 3) {
+                        scope.chooseValue = "0" + value;
+                    } else {
+                        scope.chooseValue = value;
+                    }
+                    scope.init();
                 },
             }
         })

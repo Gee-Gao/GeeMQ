@@ -54,4 +54,7 @@ public class Aunt {
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+    @TableField(exist = false)
+    private String fixMonth;
 }

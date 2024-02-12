@@ -85,21 +85,42 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
      * @createTime 2022/9/18 1:33
      */
     public List<String> auntInterval(List<LocalDate> list) {
-        List<String> auntInterval = new ArrayList<>();
         if (list.size() >= 2) {
-            for (int i = list.size() - 1; i > 0; i--) {
-                LocalDate before = list.get(i);
-                LocalDate after = list.get(i - 1);
-                long until = before.until(after, ChronoUnit.DAYS);
-
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月");
-                auntInterval.add(before.format(dateTimeFormatter) + "到" + after.format(dateTimeFormatter) + "相差" + -until + "天");
-            }
+            return auntDaySub(list).stream()
+                    .map(item -> item.get("auntDay") + "相差" + item.get("sub") + "天")
+                    .collect(Collectors.toList());
         } else {
+            List<String> auntInterval = new ArrayList<>();
             auntInterval.add("此功能需保存两次及以上记录");
+            return auntInterval;
         }
+    }
 
-        return auntInterval;
+
+    /**
+     * @description 获取姨妈天数差
+     *
+     * @param list 姨妈天数列表
+     * @return List<Map < String, Object>> 姨妈天数差列表
+     * @author Gee
+     * @createTime 2024/2/12 15:15
+     */
+    public List<Map<String, Object>> auntDaySub(List<LocalDate> list) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (int i = list.size() - 1; i > 0; i--) {
+            LocalDate currentMonth = list.get(i);
+            LocalDate before = list.get(i - 1);
+            long until = before.until(currentMonth, ChronoUnit.DAYS);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月");
+            Map<String, Object> daySub = new HashMap<>(4);
+            daySub.put("auntDay", before.format(dateTimeFormatter) + "到" + currentMonth.format(dateTimeFormatter));
+            daySub.put("sub", until);
+            daySub.put("currentMonth", currentMonth);
+            daySub.put("beforeMonth", before);
+            daySub.put("daySubStr", before.format(dateTimeFormatter) + "到" + currentMonth.format(dateTimeFormatter) + "相差" + until + "天");
+            result.add(daySub);
+        }
+        return result;
     }
 
     /**
@@ -401,7 +422,6 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 result.put("dayCount", dayCount);
                 result.put("nextDayStr", auntAnalyzer.getNextDayStr());
                 result.put("nextOvulationDayStr", auntAnalyzer.getOvulationStr());
-
             } else {
                 result.put("message", auntAnalyzer.getMessage());
             }
@@ -423,11 +443,30 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
         );
 
         if (one != null) {
-            Map<String, Object> result = new HashMap<>();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             one.setLastAunt(simpleDateFormat.format(one.getAuntDate()));
             return one;
         }
         return null;
+    }
+
+    /**
+     * @description 获取指定月天数
+     *
+     * @param aunt 姨妈参数
+     * @return Map<String, Object>
+     * @author Gee
+     * @createTime 2024/2/12 14:26
+     */
+    public List<String> auntFixMonth(Aunt aunt) {
+        List<LocalDate> list = getAuntLocalDate(aunt);
+        if (list.size() >= 2) {
+            String fixMonth = aunt.getFixMonth();
+            return auntInterval(list).stream()
+                    .filter(item -> fixMonth.equals(item.substring(14, 17)))
+                    .collect(Collectors.toList());
+        } else {
+            return Collections.singletonList("此功能需保存两次及以上记录");
+        }
     }
 }
