@@ -39,20 +39,22 @@
                             <span class="right">{{lastAunt}}</span>
                         </div>
                     </van-cell>
-
-                    <van-cell>
-                        <div class="row">
-                            <span>距离上次时间</span>
-                            <span class="right">{{timeDifference}}</span>
-                        </div>
-                    </van-cell>
                 </van-cell-group>
 
                 <van-cell-group>
                     <van-cell is-link @click="showPopup">选择时间<span
                             style="float: right"> {{auntData.auntDate}}</span></van-cell>
                     <van-popup v-model="show" position="bottom" :style="{ height: '40%' }"/>
-                    <van-datetime-picker v-model="chooseTime" @confirm="confirm"  @cancel="cancel" type="date"/>
+                    <van-datetime-picker v-model="chooseTime" @confirm="confirm" @cancel="cancel" type="date"/>
+                </van-cell-group>
+
+                <van-cell-group>
+                    <van-cell>
+                        <div class="row">
+                            <span>距离上次时间</span>
+                            <span class="right">{{timeDifference}}</span>
+                        </div>
+                    </van-cell>
                 </van-cell-group>
             </div>
 
@@ -74,8 +76,8 @@
                     chooseTime: new Date(),// 选择的日期
                     show: false,// 弹出层展示条件
                     auntData: {},// 姨妈信息,
-                    lastAunt :'',// 上一次姨妈时间
-                    timeDifference :'选择本次日期后展示',// 距离上一次时间差
+                    lastAunt: '',// 上一次姨妈时间
+                    timeDifference: '选择本次日期后展示',// 距离上一次时间差
                 }
             },
             created() {
@@ -92,7 +94,7 @@
                         if (res.data.code === 200) {
                             let lastAuntDatabase = res.data.data.lastAunt;
                             scope.lastAunt = lastAuntDatabase;
-                            localStorage.setItem("lastAunt",lastAuntDatabase);
+                            localStorage.setItem("lastAunt", lastAuntDatabase);
                         } else {
                             // 查询失败，弹出错误提示
                             vant.Notify({type: 'danger', message: res.data.msg, duration: 1000})
@@ -119,11 +121,11 @@
                     scope.auntData.auntDate = year + "-" + month + "-" + date;
 
                     // 计算与上一次的时间差
-                    let auntDateTime = new Date(scope.auntData.auntDate ).getTime();
+                    let auntDateTime = new Date(scope.auntData.auntDate).getTime();
                     let lastAuntTime = new Date(scope.lastAunt).getTime();
-                    scope.timeDifference = ( auntDateTime - lastAuntTime)/ 1000 / 3600 / 24 + "天";
+                    scope.timeDifference = (auntDateTime - lastAuntTime) / 1000 / 3600 / 24 + "天";
                 },
-                cancel(){
+                cancel() {
                     scope.show = false;
                 },
                 saveAunt() {
@@ -131,7 +133,7 @@
                         if (res.data.code === 200) {
                             let lastAuntDatabase = res.data.data.lastAunt;
                             scope.lastAunt = lastAuntDatabase;
-                            localStorage.setItem("lastAunt",lastAuntDatabase);
+                            localStorage.setItem("lastAunt", lastAuntDatabase);
                             vant.Notify({type: 'success', message: "保存成功", duration: 1000})
                         } else {
                             // 查询失败，弹出错误提示
