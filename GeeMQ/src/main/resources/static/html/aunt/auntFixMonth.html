@@ -81,6 +81,14 @@
                 scope = this;
                 // 获取当前登录用户信息
                 scope.userInfo = JSON.parse(localStorage.getItem("userInfo"));
+                let month = new Date().getMonth + 1;
+                if (month < 10) {
+                    scope.chooseValue = "0" + month + "月";
+                } else {
+                    scope.chooseValue = month + "月";
+                }
+                scope.value = month + "月";
+                scope.init();
             },
             methods: {
                 /// 返回
