@@ -189,8 +189,13 @@ public class AuntService extends ServiceImpl<AuntMapper, Aunt> {
                 .append("出现次数最多，次数为").append(maxCount).append("次");
 
         BigDecimal avg = new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 2, RoundingMode.HALF_UP);
-        LocalDate nextDay = list.get(list.size() - 1).plusDays(
-                new BigDecimal(sum).divide(new BigDecimal(list.size() - 1), 0, RoundingMode.HALF_UP).longValue());
+
+        // 计算下一个天数差，去掉一个最小值和一个最大值取平均数
+        long nextDays = new BigDecimal(sum).subtract(new BigDecimal(min)).subtract(new BigDecimal(max))
+                .divide(new BigDecimal(list.size() - 3), 0, RoundingMode.HALF_UP).longValue();
+
+        LocalDate nextDay = list.get(list.size() - 1)
+                .plusDays(nextDays);
         if (auntAnalyzer == null) {
             auntAnalyzer = new AuntAnalyzer();
             appendAnalyzerData(auntAnalyzer, min, max, daysMax, dayCount, avg, nextDay);
